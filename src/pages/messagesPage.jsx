@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { FaComments, FaShoppingCart, FaChartLine, FaTags, FaPaperPlane, FaTimes, FaReply } from "react-icons/fa";
-import { MdPending, MdCheckCircle, MdClose } from "react-icons/md";
+import { FaComments, FaShoppingCart, FaChartLine, FaTags, FaPaperPlane, FaTimes, FaReply, FaStar, FaRegStar, FaArchive, FaTrash, FaEllipsisV } from "react-icons/fa";
+import { MdPending, MdCheckCircle, MdClose, MdUnarchive } from "react-icons/md";
 
 export default function MessagesPage() {
 	const [messages, setMessages] = useState([]);
@@ -11,6 +11,8 @@ export default function MessagesPage() {
 	const [showMessageDetailModal, setShowMessageDetailModal] = useState(false);
 	const [selectedMessage, setSelectedMessage] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [showArchived, setShowArchived] = useState(false);
+	const [openMenuId, setOpenMenuId] = useState(null);
 
 	// New message form
 	const [newMessage, setNewMessage] = useState({
@@ -33,6 +35,17 @@ export default function MessagesPage() {
 	useEffect(() => {
 		fetchMessages();
 	}, []);
+
+	useEffect(() => {
+		// Close menu when clicking outside
+		const handleClickOutside = (e) => {
+			if (openMenuId && !e.target.closest('.message-options-menu')) {
+				setOpenMenuId(null);
+			}
+		};
+		document.addEventListener('click', handleClickOutside);
+		return () => document.removeEventListener('click', handleClickOutside);
+	}, [openMenuId]);
 
 	const fetchMessages = async () => {
 		try {
@@ -113,10 +126,78 @@ export default function MessagesPage() {
 		}
 	};
 
+	const handleDeleteMessage = async (messageId) => {
+		if (!confirm("Are you sure you want to delete this message?")) {
+			return;
+		}
+
+		try {
+			const token = localStorage.getItem("token");
+			await axios.delete(
+				import.meta.env.VITE_API_URL + `/api/messages/user/${messageId}`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
+			);
+			toast.success("Message deleted successfully");
+			fetchMessages();
+			setOpenMenuId(null);
+			if (showMessageDetailModal && selectedMessage?._id === messageId) {
+				setShowMessageDetailModal(false);
+				setSelectedMessage(null);
+			}
+		} catch (err) {
+			console.error("Error deleting message:", err);
+			toast.error("Failed to delete message");
+		}
+	};
+
+	const handleToggleArchive = async (messageId) => {
+		try {
+			const token = localStorage.getItem("token");
+			const res = await axios.put(
+				import.meta.env.VITE_API_URL + `/api/messages/${messageId}/archive`,
+				{},
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
+			);
+			toast.success(res.data.message);
+			fetchMessages();
+			setOpenMenuId(null);
+		} catch (err) {
+			console.error("Error toggling archive:", err);
+			toast.error("Failed to update message");
+		}
+	};
+
+	const handleToggleStar = async (messageId) => {
+		try {
+			const token = localStorage.getItem("token");
+			const res = await axios.put(
+				import.meta.env.VITE_API_URL + `/api/messages/${messageId}/star`,
+				{},
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
+			);
+			toast.success(res.data.message);
+			fetchMessages();
+			setOpenMenuId(null);
+			// Update selected message if it's open
+			if (selectedMessage?._id === messageId) {
+				setSelectedMessage(res.data.data);
+			}
+		} catch (err) {
+			console.error("Error toggling star:", err);
+			toast.error("Failed to update message");
+		}
+	};
+
 	const filteredMessages =
 		selectedCategory === "all"
-			? messages
-			: messages.filter((msg) => msg.category === selectedCategory);
+			? messages.filter(msg => msg.archived === showArchived)
+			: messages.filter((msg) => msg.category === selectedCategory && msg.archived === showArchived);
 
 	const getCategoryColor = (category) => {
 		const cat = categories.find((c) => c.id === category);
@@ -171,13 +252,26 @@ export default function MessagesPage() {
 								</p>
 							</div>
 						</div>
-						<button
-							onClick={() => setShowNewMessageModal(true)}
-							className="flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-105"
-						>
-							<FaPaperPlane />
-							New Message
-						</button>
+						<div className="flex items-center gap-3">
+							<button
+								onClick={() => setShowArchived(!showArchived)}
+								className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+									showArchived
+										? "bg-orange-500 text-white shadow-md"
+										: "bg-secondary/10 text-secondary hover:bg-secondary/20"
+								}`}
+							>
+								{showArchived ? <MdUnarchive /> : <FaArchive />}
+								{showArchived ? "Show Active" : "Show Archived"}
+							</button>
+							<button
+								onClick={() => setShowNewMessageModal(true)}
+								className="flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl hover:scale-105"
+							>
+								<FaPaperPlane />
+								New Message
+							</button>
+						</div>
 					</div>
 				</div>
 
@@ -245,14 +339,16 @@ export default function MessagesPage() {
 							{filteredMessages.map((msg) => (
 								<div
 									key={msg._id}
-									onClick={() => {
-										setSelectedMessage(msg);
-										setShowMessageDetailModal(true);
-									}}
-									className="group p-6 rounded-2xl border-2 border-secondary/10 hover:border-accent/30 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-r from-white to-primary/5"
+									className="group relative p-6 rounded-2xl border-2 border-secondary/10 hover:border-accent/30 hover:shadow-lg transition-all bg-gradient-to-r from-white to-primary/5"
 								>
 									<div className="flex items-start justify-between">
-										<div className="flex-1">
+										<div 
+											className="flex-1 cursor-pointer"
+											onClick={() => {
+												setSelectedMessage(msg);
+												setShowMessageDetailModal(true);
+											}}
+										>
 											<div className="flex items-center gap-3 mb-2">
 												<span
 													className={`px-3 py-1 rounded-lg text-xs font-bold bg-${getCategoryColor(
@@ -266,6 +362,14 @@ export default function MessagesPage() {
 													{msg.category.toUpperCase()}
 												</span>
 												{getStatusBadge(msg.status)}
+												{msg.starred && (
+													<FaStar className="text-yellow-500 text-sm" />
+												)}
+												{msg.archived && (
+													<span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-lg text-xs font-bold">
+														ARCHIVED
+													</span>
+												)}
 											</div>
 											<h3 className="text-lg font-bold text-secondary mb-1 group-hover:text-accent transition-colors">
 												{msg.subject}
@@ -290,6 +394,72 @@ export default function MessagesPage() {
 													</span>
 												)}
 											</div>
+										</div>
+
+										{/* Message Options Menu */}
+										<div className="relative message-options-menu">
+											<button
+												onClick={(e) => {
+													e.stopPropagation();
+													setOpenMenuId(openMenuId === msg._id ? null : msg._id);
+												}}
+												className="p-2 rounded-lg hover:bg-secondary/10 transition-colors"
+											>
+												<FaEllipsisV className="text-secondary/60" />
+											</button>
+
+											{openMenuId === msg._id && (
+												<div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border-2 border-secondary/10 z-10 overflow-hidden">
+													<button
+														onClick={(e) => {
+															e.stopPropagation();
+															handleToggleStar(msg._id);
+														}}
+														className="w-full px-4 py-3 text-left text-sm font-semibold text-secondary hover:bg-yellow-50 transition-colors flex items-center gap-3"
+													>
+														{msg.starred ? (
+															<>
+																<FaRegStar className="text-yellow-500" />
+																Unstar
+															</>
+														) : (
+															<>
+																<FaStar className="text-yellow-500" />
+																Star
+															</>
+														)}
+													</button>
+													<button
+														onClick={(e) => {
+															e.stopPropagation();
+															handleToggleArchive(msg._id);
+														}}
+														className="w-full px-4 py-3 text-left text-sm font-semibold text-secondary hover:bg-orange-50 transition-colors flex items-center gap-3"
+													>
+														{msg.archived ? (
+															<>
+																<MdUnarchive className="text-orange-500" />
+																Unarchive
+															</>
+														) : (
+															<>
+																<FaArchive className="text-orange-500" />
+																Archive
+															</>
+														)}
+													</button>
+													<button
+														onClick={(e) => {
+															e.stopPropagation();
+															handleDeleteMessage(msg._id);
+														}}
+														className="w-full px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3 border-t border-secondary/10"
+													>
+														<FaTrash />
+														Delete
+													</button>
+												</div>
+											)}
 										</div>
 									</div>
 								</div>
@@ -404,12 +574,25 @@ export default function MessagesPage() {
 									</span>
 									{getStatusBadge(selectedMessage.status)}
 								</div>
-								<button
-									onClick={() => setShowMessageDetailModal(false)}
-									className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 flex items-center justify-center transition-colors"
-								>
-									<FaTimes />
-								</button>
+								<div className="flex items-center gap-2">
+									<button
+										onClick={() => handleToggleStar(selectedMessage._id)}
+										className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-yellow-50 flex items-center justify-center transition-colors"
+										title={selectedMessage.starred ? "Unstar" : "Star"}
+									>
+										{selectedMessage.starred ? (
+											<FaStar className="text-yellow-500 text-lg" />
+										) : (
+											<FaRegStar className="text-secondary/60 text-lg" />
+										)}
+									</button>
+									<button
+										onClick={() => setShowMessageDetailModal(false)}
+										className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 flex items-center justify-center transition-colors"
+									>
+										<FaTimes />
+									</button>
+								</div>
 							</div>
 
 							<h2 className="text-3xl font-bold text-secondary mb-4">

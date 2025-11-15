@@ -34,18 +34,7 @@ export default function CartPage() {
 							{cart.map((item, index) => {
 								return (
 									<div key={index} className="group bg-white rounded-3xl shadow-lg hover:shadow-xl border border-accent/10 overflow-hidden transition-all duration-300">
-										<div className="flex flex-col lg:flex-row items-center p-4 lg:p-6 gap-4 relative">
-											{/* Delete Button */}
-											<button 
-												className="absolute top-4 right-4 lg:top-auto lg:bottom-auto lg:right-6 text-red-500 hover:bg-red-50 rounded-full p-2 transition-all duration-300 hover:scale-110"
-												onClick={() => {
-													addToCart(item, -item.quantity);
-													setCart(loadCart());
-												}}
-											>
-												<BiTrash className="text-xl" />
-											</button>
-
+										<div className="flex flex-col lg:flex-row items-center p-4 lg:p-6 gap-4">
 											{/* Product Image */}
 											<div className="w-full lg:w-auto">
 												<img 
@@ -85,7 +74,7 @@ export default function CartPage() {
 											</div>
 
 											{/* Price */}
-											<div className="flex flex-col items-center lg:items-end gap-1 min-w-[140px]">
+											<div className="flex flex-col items-center lg:items-end gap-1 min-w-[140px] pr-0 lg:pr-2">
 												{item.labelledPrice > item.price && (
 													<span className="text-secondary/50 line-through text-sm">
 														LKR {item.labelledPrice.toFixed(2)}
@@ -98,6 +87,18 @@ export default function CartPage() {
 													LKR {item.price.toFixed(2)} each
 												</span>
 											</div>
+
+											{/* Delete Button */}
+											<button 
+												className="text-red-500 hover:bg-red-50 rounded-full p-3 transition-all duration-300 hover:scale-110 flex-shrink-0"
+												onClick={() => {
+													addToCart(item, -item.quantity);
+													setCart(loadCart());
+												}}
+												title="Remove from cart"
+											>
+												<BiTrash className="text-2xl" />
+											</button>
 										</div>
 									</div>
 								);

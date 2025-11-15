@@ -161,6 +161,14 @@ export default function AdminOrdersPage() {
 									</th>
 									<th className="sticky top-0 z-10 px-3 py-3 text-xs font-bold uppercase tracking-wider text-center">
 										<div className="flex items-center justify-center gap-2">
+											<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+											</svg>
+											Payment
+										</div>
+									</th>
+									<th className="sticky top-0 z-10 px-3 py-3 text-xs font-bold uppercase tracking-wider text-center">
+										<div className="flex items-center justify-center gap-2">
 											<MdLocalShipping className="w-4 h-4" />
 											Status
 										</div>
@@ -247,6 +255,26 @@ export default function AdminOrdersPage() {
 													{item.total.toFixed(2)}
 												</div>
 											</td>
+											<td className="px-3 py-3 text-center">
+												{item.paymentStatus === "paid" ? (
+													<div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold bg-green-50 text-green-700 border border-green-300">
+														<MdCheckCircle className="w-3 h-3" />
+														PAID
+													</div>
+												) : item.paymentStatus === "pending" ? (
+													<div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold bg-orange-50 text-orange-700 border border-orange-300 animate-pulse">
+														<MdPendingActions className="w-3 h-3" />
+														PENDING
+													</div>
+												) : (
+													<div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold bg-red-50 text-red-700 border border-red-300">
+														<svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+														</svg>
+														UNPAID
+													</div>
+												)}
+											</td>
                                             <td className="px-3 py-3 text-center">
 												{item.status === "delivered" ? (
 													<div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold bg-green-50 text-green-700 border border-green-300">
@@ -280,7 +308,7 @@ export default function AdminOrdersPage() {
 									<tr>
 										<td
 											className="px-6 py-20 text-center text-secondary/60"
-											colSpan={9}
+											colSpan={10}
 										>
 											<div className="flex flex-col items-center gap-4">
 												<div className="w-24 h-24 bg-gradient-to-br from-accent/20 to-accent/5 rounded-3xl flex items-center justify-center">

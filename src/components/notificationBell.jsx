@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FaBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ export default function NotificationBell() {
 	const [notifications, setNotifications] = useState([]);
 	const [showDropdown, setShowDropdown] = useState(false);
 	const [unreadCount, setUnreadCount] = useState(0);
+	const dropdownRef = useRef(null);
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -16,93 +17,260 @@ export default function NotificationBell() {
 		return () => clearInterval(interval);
 	}, []);
 
+	// Click outside to close dropdown
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+				setShowDropdown(false);
+			}
+		};
+
+		if (showDropdown) {
+			document.addEventListener("mousedown", handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [showDropdown]);
+
 	const fetchNotifications = async () => {
 		try {
 			const token = localStorage.getItem("token");
 			if (!token) return;
+
+			// Check user role
+			const userRes = await axios.get(import.meta.env.VITE_API_URL + "/api/users/me", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const isAdmin = userRes.data.role === "admin";
 
 			// Fetch orders and messages
 			const [ordersRes, messagesRes] = await Promise.all([
 				axios.get(import.meta.env.VITE_API_URL + "/api/orders", {
 					headers: { Authorization: `Bearer ${token}` },
 				}),
-				axios.get(import.meta.env.VITE_API_URL + "/api/messages", {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
+				axios.get(
+					import.meta.env.VITE_API_URL + 
+					(isAdmin ? "/api/messages" : "/api/messages/my-messages"),
+					{
+						headers: { Authorization: `Bearer ${token}` },
+					}
+				),
 			]);
 
 			const newNotifications = [];
 
-			// Check for order updates with feedback
-			ordersRes.data.forEach((order) => {
-				if (order.customerFeedback && order.customerFeedback.length > 0) {
-					const lastFeedback = order.customerFeedback[order.customerFeedback.length - 1];
-					newNotifications.push({
-						id: `order-feedback-${order._id}`,
-						sourceId: order._id,
-						type: "order-feedback",
-						title: `New feedback on order #${order.orderID}`,
-						message: lastFeedback.message.substring(0, 50) + "...",
-						date: lastFeedback.date,
-						link: "/my-orders",
-						isAdmin: lastFeedback.isAdmin,
-					});
-				}
+			if (isAdmin) {
+				// Admin notifications
+				// Check for order updates with feedback
+				ordersRes.data.forEach((order) => {
+					if (order.customerFeedback && order.customerFeedback.length > 0) {
+						const lastFeedback = order.customerFeedback[order.customerFeedback.length - 1];
+						newNotifications.push({
+							id: `order-feedback-${order._id}`,
+							sourceId: order._id,
+							type: "order-feedback",
+							title: `New feedback on order #${order.orderID}`,
+							message: lastFeedback.message.substring(0, 50) + "...",
+							date: lastFeedback.date,
+							link: "/admin/user-orders",
+							isAdmin: lastFeedback.isAdmin,
+						});
+					}
 
-				// Check for cancellation/return requests
-				if (order.cancellationStatus === "requested") {
-					newNotifications.push({
-						id: `order-cancel-${order._id}`,
-						sourceId: order._id,
-						type: "cancellation",
-						title: `Cancellation requested - #${order.orderID}`,
-						message: "A customer has requested to cancel this order",
-						date: order.date,
-						link: "/admin/user-orders",
-					});
-				}
+					// Check for cancellation/return requests
+					if (order.cancellationStatus === "requested") {
+						newNotifications.push({
+							id: `order-cancel-${order._id}`,
+							sourceId: order._id,
+							type: "cancellation",
+							title: `Cancellation requested - #${order.orderID}`,
+							message: "A customer has requested to cancel this order",
+							date: order.date,
+							link: "/admin/user-orders",
+						});
+					}
 
-				if (order.returnStatus === "requested") {
-					newNotifications.push({
-						id: `order-return-${order._id}`,
-						sourceId: order._id,
-						type: "return",
-						title: `Return requested - #${order.orderID}`,
-						message: "A customer has requested to return this order",
-						date: order.date,
-						link: "/admin/user-orders",
-					});
-				}
+					if (order.returnStatus === "requested") {
+						newNotifications.push({
+							id: `order-return-${order._id}`,
+							sourceId: order._id,
+							type: "return",
+							title: `Return requested - #${order.orderID}`,
+							message: "A customer has requested to return this order",
+							date: order.date,
+							link: "/admin/user-orders",
+						});
+					}
 
-				// Status updates
-				if (order.status === "delivered" && !order.notificationSeen) {
-					newNotifications.push({
-						id: `order-delivered-${order._id}`,
-						sourceId: order._id,
-						type: "delivered",
-						title: `Order delivered - #${order.orderID}`,
-						message: "Your order has been delivered",
-						date: order.date,
-						link: "/my-orders",
-					});
-				}
-			});
+					// Payment pending approval
+					if (order.paymentStatus === "pending") {
+						newNotifications.push({
+							id: `payment-pending-${order._id}`,
+							sourceId: order._id,
+							type: "payment-pending",
+							title: `Payment approval needed - #${order.orderID}`,
+							message: "Customer payment is awaiting approval",
+							date: order.date,
+							link: "/admin/user-orders",
+						});
+					}
+				});
 
-			// Check for new messages
-			messagesRes.data.forEach((msg) => {
-				// treat adminRead flag to avoid repeatedly notifying already-read messages
-				if ((msg.status === "pending" || (msg.replies && msg.replies.length > 0)) && !msg.adminRead) {
-					newNotifications.push({
-						id: `message-${msg._id}`,
-						sourceId: msg._id,
-						type: "message",
-						title: `New message: ${msg.subject}`,
-						message: msg.message.substring(0, 50) + "...",
-						date: msg.date,
-						link: "/messages",
-					});
-				}
-			});
+				// Check for new messages from users
+				messagesRes.data.forEach((msg) => {
+					if ((msg.status === "pending" || (msg.replies && msg.replies.length > 0)) && !msg.adminRead) {
+						newNotifications.push({
+							id: `message-${msg._id}`,
+							sourceId: msg._id,
+							type: "message",
+							title: `New message: ${msg.subject}`,
+							message: msg.message.substring(0, 50) + "...",
+							date: msg.createdAt,
+							link: "/admin/messages",
+						});
+					}
+				});
+			} else {
+				// User notifications
+				ordersRes.data.forEach((order) => {
+					// Order status updates
+					if (order.status === "shipped" && !order.notificationSeen) {
+						newNotifications.push({
+							id: `order-shipped-${order._id}`,
+							sourceId: order._id,
+							type: "shipped",
+							title: `Order shipped - #${order.orderID}`,
+							message: "Your order is on the way!",
+							date: order.updatedAt || order.date,
+							link: "/my-orders",
+						});
+					}
+
+					if (order.status === "delivered" && !order.notificationSeen) {
+						newNotifications.push({
+							id: `order-delivered-${order._id}`,
+							sourceId: order._id,
+							type: "delivered",
+							title: `Order delivered - #${order.orderID}`,
+							message: "Your order has been delivered successfully",
+							date: order.updatedAt || order.date,
+							link: "/my-orders",
+						});
+					}
+
+					// Payment status updates
+					if (order.paymentStatus === "paid" && order.paymentDetails?.paymentDate) {
+						const paymentDate = new Date(order.paymentDetails.paymentDate);
+						const daysSincePayment = (Date.now() - paymentDate) / (1000 * 60 * 60 * 24);
+						if (daysSincePayment < 7) { // Show for 7 days
+							newNotifications.push({
+								id: `payment-approved-${order._id}`,
+								sourceId: order._id,
+								type: "payment-approved",
+								title: `Payment approved - #${order.orderID}`,
+								message: "Your payment has been verified and approved",
+								date: order.paymentDetails.paymentDate,
+								link: "/my-orders",
+							});
+						}
+					}
+
+					if (order.paymentStatus === "unpaid" && order.paymentDetails?.rejectionReason) {
+						newNotifications.push({
+							id: `payment-rejected-${order._id}`,
+							sourceId: order._id,
+							type: "payment-rejected",
+							title: `Payment issue - #${order.orderID}`,
+							message: order.paymentDetails.rejectionReason,
+							date: order.updatedAt || order.date,
+							link: "/my-orders",
+						});
+					}
+
+					// Cancellation/return status updates
+					if (order.cancellationStatus === "approved") {
+						newNotifications.push({
+							id: `cancel-approved-${order._id}`,
+							sourceId: order._id,
+							type: "cancellation-approved",
+							title: `Cancellation approved - #${order.orderID}`,
+							message: "Your cancellation request has been approved",
+							date: order.updatedAt || order.date,
+							link: "/my-orders",
+						});
+					}
+
+					if (order.returnStatus === "approved") {
+						newNotifications.push({
+							id: `return-approved-${order._id}`,
+							sourceId: order._id,
+							type: "return-approved",
+							title: `Return approved - #${order.orderID}`,
+							message: "Your return request has been approved",
+							date: order.updatedAt || order.date,
+							link: "/my-orders",
+						});
+					}
+
+					// Admin replies to order feedback
+					if (order.customerFeedback && order.customerFeedback.length > 0) {
+						const adminReplies = order.customerFeedback.filter(f => f.isAdmin);
+						if (adminReplies.length > 0) {
+							const lastReply = adminReplies[adminReplies.length - 1];
+							newNotifications.push({
+								id: `admin-reply-${order._id}`,
+								sourceId: order._id,
+								type: "admin-reply",
+								title: `Admin replied to your order - #${order.orderID}`,
+								message: lastReply.message.substring(0, 50) + "...",
+								date: lastReply.date,
+								link: "/my-orders",
+							});
+						}
+					}
+				});
+
+				// Check for new messages and replies
+				messagesRes.data.forEach((msg) => {
+					// Messages from admin or new replies
+					if (msg.replies && msg.replies.length > 0) {
+						const adminReplies = msg.replies.filter(r => r.senderRole === "admin");
+						if (adminReplies.length > 0) {
+							const lastReply = adminReplies[adminReplies.length - 1];
+							const daysSinceReply = (Date.now() - new Date(lastReply.createdAt)) / (1000 * 60 * 60 * 24);
+							if (daysSinceReply < 7) { // Show for 7 days
+								newNotifications.push({
+									id: `message-reply-${msg._id}`,
+									sourceId: msg._id,
+									type: "message-reply",
+									title: `Admin replied: ${msg.subject}`,
+									message: lastReply.message.substring(0, 50) + "...",
+									date: lastReply.createdAt,
+									link: "/messages",
+								});
+							}
+						}
+					}
+
+					// Status changes
+					if (msg.status === "replied" && msg.updatedAt) {
+						const daysSinceUpdate = (Date.now() - new Date(msg.updatedAt)) / (1000 * 60 * 60 * 24);
+						if (daysSinceUpdate < 7) {
+							newNotifications.push({
+								id: `message-status-${msg._id}`,
+								sourceId: msg._id,
+								type: "message-status",
+								title: `Message updated: ${msg.subject}`,
+								message: "Your message has been reviewed",
+								date: msg.updatedAt,
+								link: "/messages",
+							});
+						}
+					}
+				});
+			}
 
 			// Sort by date (newest first)
 			newNotifications.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -145,16 +313,25 @@ export default function NotificationBell() {
 	const getNotificationIcon = (type) => {
 		const icons = {
 			"order-feedback": "💬",
-			cancellation: "❌",
-			return: "🔄",
-			delivered: "📦",
-			message: "✉️",
+			"cancellation": "❌",
+			"return": "🔄",
+			"delivered": "✅",
+			"shipped": "📦",
+			"message": "✉️",
+			"message-reply": "💬",
+			"message-status": "📋",
+			"payment-pending": "⏳",
+			"payment-approved": "✅",
+			"payment-rejected": "❌",
+			"cancellation-approved": "✓",
+			"return-approved": "✓",
+			"admin-reply": "👤",
 		};
 		return icons[type] || "🔔";
 	};
 
 	return (
-		<div className="relative">
+		<div className="relative" ref={dropdownRef}>
 			<button
 				onClick={() => setShowDropdown(!showDropdown)}
 				className="relative p-3 bg-accent hover:bg-accent/90 rounded-xl transition-all duration-300 group shadow-lg hover:shadow-xl"
@@ -168,7 +345,7 @@ export default function NotificationBell() {
 			</button>
 
 			{showDropdown && (
-				<div className="absolute right-0 top-14 w-96 max-h-96 overflow-y-auto bg-white rounded-2xl shadow-2xl border-2 border-secondary/10 z-50 animate-fade-in">
+				<div className="absolute right-0 top-14 w-96 max-h-96 overflow-y-auto bg-white rounded-2xl shadow-2xl border-2 border-secondary/10 z-[9999] animate-fade-in">
 					<div className="p-4 border-b-2 border-secondary/10 bg-gradient-to-r from-accent/10 to-accent/5">
 						<h3 className="font-bold text-secondary">Notifications</h3>
 						<p className="text-xs text-secondary/60">{unreadCount} new updates</p>

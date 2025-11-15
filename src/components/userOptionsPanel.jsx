@@ -367,7 +367,7 @@ export default function UserOptionsPanel({ isOpen, onClose }) {
 					{/* App Info */}
 					<div className="mt-6 pt-6 border-t border-secondary/10 text-center">
 						<p className="text-sm text-secondary/60">
-							CBC E-Commerce Platform
+							GBG E-Commerce Platform
 						</p>
 						<p className="text-xs text-secondary/40 mt-1">Version 1.0.0</p>
 					</div>
