@@ -6,6 +6,11 @@
 	--color-secondary: #2B2B2B;
 }
 
+/* Ensure primary background color is applied */
+.bg-primary {
+	background-color: hsl(303, 100%, 79%) !important;
+}
+
 /* Professional Sidebar Animations */
 @keyframes fadeIn {
 	from {

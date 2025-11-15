@@ -334,9 +334,9 @@ export default function NotificationBell() {
 		<div className="relative" ref={dropdownRef}>
 			<button
 				onClick={() => setShowDropdown(!showDropdown)}
-				className="relative p-3 bg-accent hover:bg-accent/90 rounded-xl transition-all duration-300 group shadow-lg hover:shadow-xl"
+				className="relative p-3 bg-accent hover:bg-accent/90 rounded-xl transition-all duration-300 group shadow-md hover:shadow-lg"
 			>
-				<FaBell className="text-2xl text-white group-hover:scale-110 transition-transform" />
+				<FaBell className="text-xl text-white group-hover:scale-110 transition-transform" />
 				{unreadCount > 0 && (
 					<span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
 						{unreadCount > 9 ? "9+" : unreadCount}
@@ -345,8 +345,8 @@ export default function NotificationBell() {
 			</button>
 
 			{showDropdown && (
-				<div className="absolute right-0 top-14 w-96 max-h-96 overflow-y-auto bg-white rounded-2xl shadow-2xl border-2 border-secondary/10 z-[9999] animate-fade-in">
-					<div className="p-4 border-b-2 border-secondary/10 bg-gradient-to-r from-accent/10 to-accent/5">
+				<div className="absolute right-0 top-16 w-[90vw] sm:w-96 max-h-[80vh] overflow-y-auto bg-pink-200 rounded-2xl shadow-2xl border-2 border-accent/20 z-[9999] animate-fade-in">
+					<div className="sticky top-0 p-4 border-b-2 border-accent/20 bg-accent/10 z-10">
 						<h3 className="font-bold text-secondary">Notifications</h3>
 						<p className="text-xs text-secondary/60">{unreadCount} new updates</p>
 					</div>

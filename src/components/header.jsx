@@ -41,19 +41,14 @@ export default function Header() {
 	};
 
 	return (
-		<header className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 h-[100px] text-white shadow-2xl relative z-50 overflow-hidden">
-			{/* Animated background elements */}
-			<div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-			<div className="absolute bottom-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-			
-			<div className="max-w-[1600px] mx-auto h-full flex items-center justify-between px-6 lg:px-10 relative z-10">
+		<header className="w-full bg-pink-200 h-[100px] text-secondary shadow-md border-b-2 border-accent/20 relative z-50">
+			<div className="max-w-[1600px] mx-auto h-full flex items-center justify-between px-6 lg:px-10 relative">
 				{/* Logo - Desktop */}
 				<Link to="/" className="hidden lg:flex items-center gap-3 group">
 					<div className="relative">
-						<div className="absolute -inset-2 bg-white/20 rounded-full blur-xl group-hover:blur-2xl transition-all"></div>
 						<img
 							src="/logo.png"
-							className="relative h-[80px] w-auto object-contain transition-transform group-hover:scale-110 duration-300 drop-shadow-2xl"
+							className="h-[80px] w-auto object-contain transition-transform group-hover:scale-105 duration-300"
 							alt="GBG Logo"
 						/>
 					</div>
@@ -63,45 +58,42 @@ export default function Header() {
 				<div className="lg:hidden w-full flex items-center justify-between">
 					<button
 						onClick={() => setIsSidebarOpen(true)}
-						className="p-2 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-110"
+						className="p-2 hover:bg-accent/10 rounded-xl transition-all duration-300 hover:scale-105 text-secondary"
 						aria-label="Open menu"
 					>
-						<MdMenu className="text-3xl drop-shadow-lg" />
+						<MdMenu className="text-3xl" />
 					</button>
 					<Link to="/" className="flex items-center">
-						<div className="relative">
-							<div className="absolute -inset-2 bg-white/20 rounded-full blur-xl"></div>
-							<img src="/logo.png" className="relative h-[70px] w-auto object-contain drop-shadow-2xl" alt="GBG Logo" />
-						</div>
+						<img src="/logo.png" className="h-[70px] w-auto object-contain" alt="GBG Logo" />
 					</Link>
 					<div className="flex items-center gap-2">
 						<NotificationBell />
 						<Link
 							to="/cart"
-							className="p-2 hover:bg-white/20 rounded-xl transition-all duration-300 relative hover:scale-110"
+							className="p-2 hover:bg-accent/10 rounded-xl transition-all duration-300 relative hover:scale-105 text-secondary"
 						>
-							<BsCart3 className="text-2xl drop-shadow-lg" />
+							<BsCart3 className="text-2xl" />
 						</Link>
 						{user ? (
 							<button
 								onClick={() => setIsUserPanelOpen(true)}
-								className="flex items-center gap-2 px-2 py-1 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-105"
+								className="flex items-center gap-2 px-2 py-1 hover:bg-accent/10 rounded-xl transition-all duration-300 hover:scale-105"
 								aria-label="Open user menu"
 							>
-								<div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-pink-600 font-bold text-sm shadow-xl">
-									{getUserInitials()}
-								</div>
-								<span className="text-sm font-semibold text-white drop-shadow-lg">
+							<div className="w-9 h-9 bg-accent rounded-full flex items-center justify-center text-primary font-bold text-sm shadow-md">
+								{getUserInitials()}
+							</div>
+								<span className="text-sm font-semibold text-secondary">
 									{user.firstName}
 								</span>
 							</button>
 						) : (
 							<button
 								onClick={() => setIsUserPanelOpen(true)}
-								className="p-2 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-110"
+								className="p-2 hover:bg-accent/10 rounded-xl transition-all duration-300 hover:scale-105 text-secondary"
 								aria-label="Open user menu"
 							>
-								<FaUserCircle className="text-2xl drop-shadow-lg" />
+								<FaUserCircle className="text-2xl" />
 							</button>
 						)}
 					</div>
@@ -110,30 +102,23 @@ export default function Header() {
 				{/* Mobile Sidebar */}
 				{isSideBarOpen && (
 					<div className="fixed inset-0 bg-secondary/80 backdrop-blur-sm z-[100] lg:hidden animate-fade-in">
-						<div className="w-[320px] bg-gradient-to-b from-purple-50 via-pink-50 to-white h-full flex flex-col shadow-2xl animate-slide-in">
-							{/* Sidebar Header */}
-							<div className="h-[100px] w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 flex items-center justify-between px-6 shadow-xl relative overflow-hidden">
-								<div className="absolute top-0 left-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
-								<div className="absolute bottom-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-								<button
-									onClick={() => setIsSidebarOpen(false)}
-									className="relative z-10 p-2 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-110"
-									aria-label="Close menu"
-								>
-									<MdClose className="text-white text-3xl drop-shadow-lg" />
-								</button>
-								<div className="relative">
-									<div className="absolute -inset-2 bg-white/20 rounded-full blur-xl"></div>
-									<img
-										src="/logo.png"
-										className="relative h-[70px] w-auto object-contain drop-shadow-2xl"
-										alt="GBG Logo"
-									/>
-								</div>
-								<div className="w-10"></div>
-							</div>
-
-							{/* Sidebar Menu */}
+					<div className="w-[320px] bg-pink-200 h-full flex flex-col shadow-2xl animate-slide-in">
+						{/* Sidebar Header */}
+						<div className="h-[100px] w-full bg-accent flex items-center justify-between px-6 shadow-md border-b-2 border-accent/30">
+							<button
+								onClick={() => setIsSidebarOpen(false)}
+								className="p-2 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-105 text-white"
+								aria-label="Close menu"
+							>
+								<MdClose className="text-3xl" />
+							</button>
+							<img
+								src="/logo.png"
+								className="h-[70px] w-auto object-contain"
+								alt="GBG Logo"
+							/>
+							<div className="w-10"></div>
+						</div>							{/* Sidebar Menu */}
 							<nav className="flex flex-col py-4">
 								<Link
 									to="/"
@@ -268,8 +253,8 @@ export default function Header() {
 						to="/"
 						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
 							isActive('/') 
-								? 'bg-white/30 text-white shadow-xl scale-105 backdrop-blur-sm' 
-								: 'hover:bg-white/20 text-white/90 hover:scale-105'
+								? 'bg-accent text-white shadow-md' 
+								: 'hover:bg-accent/10 text-secondary hover:text-accent'
 						}`}
 					>
 						Home
@@ -278,8 +263,8 @@ export default function Header() {
 						to="/products"
 						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
 							isActive('/products') 
-								? 'bg-white/30 text-white shadow-xl scale-105 backdrop-blur-sm' 
-								: 'hover:bg-white/20 text-white/90 hover:scale-105'
+								? 'bg-accent text-white shadow-md' 
+								: 'hover:bg-accent/10 text-secondary hover:text-accent'
 						}`}
 					>
 						Products
@@ -288,8 +273,8 @@ export default function Header() {
 						to="/wishlist"
 						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
 							isActive('/wishlist') 
-								? 'bg-white/30 text-white shadow-xl scale-105 backdrop-blur-sm' 
-								: 'hover:bg-white/20 text-white/90 hover:scale-105'
+								? 'bg-accent text-white shadow-md' 
+								: 'hover:bg-accent/10 text-secondary hover:text-accent'
 						}`}
 					>
 						Wishlist
@@ -298,8 +283,8 @@ export default function Header() {
 						to="/help"
 						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
 							isActive('/help') 
-								? 'bg-white/30 text-white shadow-xl scale-105 backdrop-blur-sm' 
-								: 'hover:bg-white/20 text-white/90 hover:scale-105'
+								? 'bg-accent text-white shadow-md' 
+								: 'hover:bg-accent/10 text-secondary hover:text-accent'
 						}`}
 					>
 						Help
@@ -308,8 +293,8 @@ export default function Header() {
 						to="/about"
 						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
 							isActive('/about') 
-								? 'bg-white/30 text-white shadow-xl scale-105 backdrop-blur-sm' 
-								: 'hover:bg-white/20 text-white/90 hover:scale-105'
+								? 'bg-accent text-white shadow-md' 
+								: 'hover:bg-accent/10 text-secondary hover:text-accent'
 						}`}
 					>
 						About
@@ -318,8 +303,8 @@ export default function Header() {
 						to="/contact"
 						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
 							isActive('/contact') 
-								? 'bg-white/30 text-white shadow-xl scale-105 backdrop-blur-sm' 
-								: 'hover:bg-white/20 text-white/90 hover:scale-105'
+								? 'bg-accent text-white shadow-md' 
+								: 'hover:bg-accent/10 text-secondary hover:text-accent'
 						}`}
 					>
 						Contact
@@ -331,35 +316,35 @@ export default function Header() {
 					<NotificationBell />
 					<Link
 						to="/cart"
-						className="relative p-3 hover:bg-white/20 rounded-xl transition-all duration-300 group hover:scale-110"
+						className="relative p-3 hover:bg-accent/10 rounded-xl transition-all duration-300 group hover:scale-105 text-secondary"
 					>
-						<BsCart3 className="text-2xl group-hover:scale-110 transition-transform drop-shadow-lg" />
+						<BsCart3 className="text-2xl group-hover:scale-110 transition-transform" />
 					</Link>
 					
 					{/* User Profile Display */}
 					{user ? (
 						<button
 							onClick={() => setIsUserPanelOpen(true)}
-							className="flex items-center gap-3 px-4 py-2 hover:bg-white/20 rounded-xl transition-all duration-300 group hover:scale-105"
+							className="flex items-center gap-3 px-4 py-2 hover:bg-accent/10 rounded-xl transition-all duration-300 group hover:scale-105"
 							aria-label="Open user menu"
 						>
-							<div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pink-600 font-bold shadow-xl group-hover:scale-110 transition-transform">
+							<div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center text-primary font-bold shadow-md group-hover:scale-110 transition-transform">
 								{getUserInitials()}
 							</div>
 							<div className="text-left">
-								<p className="text-sm font-bold text-white leading-tight drop-shadow-lg">
+								<p className="text-sm font-bold text-secondary leading-tight">
 									{user.firstName} {user.lastName}
 								</p>
-								<p className="text-xs text-white/90">View Profile</p>
+								<p className="text-xs text-secondary/60">View Profile</p>
 							</div>
 						</button>
 					) : (
 						<button
 							onClick={() => setIsUserPanelOpen(true)}
-							className="p-3 hover:bg-white/20 rounded-xl transition-all duration-300 group hover:scale-110"
+							className="p-3 hover:bg-accent/10 rounded-xl transition-all duration-300 group hover:scale-105 text-secondary"
 							aria-label="Open user menu"
 						>
-							<FaUserCircle className="text-2xl group-hover:scale-110 transition-transform drop-shadow-lg" />
+							<FaUserCircle className="text-2xl group-hover:scale-110 transition-transform" />
 						</button>
 					)}
 				</div>
