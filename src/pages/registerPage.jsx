@@ -86,7 +86,7 @@ export default function RegisterPage() {
 
 					<p className="text-white/90 text-sm font-semibold backdrop-blur-sm bg-white/10 rounded-xl p-3 border border-white/20">
 						© {new Date().getFullYear()} GBG – Glimora Beauty Glow. All rights
-						reserved. 💖
+						reserved. 
 					</p>
 				</div>
 
@@ -107,7 +107,7 @@ export default function RegisterPage() {
 									Create Account ✨
 								</h2>
 								<p className="text-gray-600 text-sm font-medium">
-									Join GBG and start your beautiful journey today! 🌟
+									Join GBG and start your beautiful journey today! 
 								</p>
 							</div>
 
@@ -118,7 +118,7 @@ export default function RegisterPage() {
 											htmlFor="firstName"
 											className="text-sm font-bold text-gray-700 flex items-center gap-2"
 										>
-											<span className="text-purple-600">👤</span> First Name
+											<span className="text-purple-600"></span> First Name
 										</label>
 										<input
 											id="firstName"
@@ -134,7 +134,7 @@ export default function RegisterPage() {
 											htmlFor="lastName"
 											className="text-sm font-bold text-gray-700 flex items-center gap-2"
 										>
-											<span className="text-pink-600">👤</span> Last Name
+											<span className="text-pink-600"></span> Last Name
 										</label>
 										<input
 											id="lastName"
@@ -152,7 +152,7 @@ export default function RegisterPage() {
 										htmlFor="email"
 										className="text-sm font-bold text-gray-700 flex items-center gap-2"
 									>
-										<span className="text-orange-600">📧</span> Email address
+										<span className="text-orange-600"></span> Email address
 									</label>
 									<input
 										id="email"
@@ -169,7 +169,7 @@ export default function RegisterPage() {
 										htmlFor="password"
 										className="text-sm font-bold text-gray-700 flex items-center gap-2"
 									>
-										<span className="text-green-600">🔒</span> Password
+										<span className="text-green-600"></span> Password
 									</label>
 									<input
 										id="password"
@@ -186,7 +186,7 @@ export default function RegisterPage() {
 										htmlFor="confirmPassword"
 										className="text-sm font-bold text-gray-700 flex items-center gap-2"
 									>
-										<span className="text-cyan-600">🔑</span> Confirm Password
+										<span className="text-cyan-600"></span> Confirm Password
 									</label>
 									<input
 										id="confirmPassword"										
@@ -203,7 +203,7 @@ export default function RegisterPage() {
 									className="w-full h-12 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white font-bold text-lg shadow-xl shadow-purple-300/50 hover:shadow-2xl hover:shadow-pink-400/50 hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
 								>
 									<span className="relative z-10 flex items-center justify-center gap-2">
-										Create Account <span className="group-hover:translate-x-1 transition-transform">✨</span>
+										Create Account <span className="group-hover:translate-x-1 transition-transform"></span>
 									</span>
 									<div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-orange-600 to-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 								</button>
@@ -215,14 +215,14 @@ export default function RegisterPage() {
 									to="/login"
 									className="text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-bold hover:from-pink-600 hover:to-orange-600 transition-all"
 								>
-									Login here 🚀
+									Login here 
 								</Link>
 							</div>
 						</div>
 
 						{/* Small footer for mobile */}
 						<p className="mt-6 text-center text-white/95 text-xs lg:hidden font-semibold backdrop-blur-sm bg-white/10 rounded-xl p-3 border border-white/20">
-							© {new Date().getFullYear()} GBG – Glimora Beauty Glow 💖
+							© {new Date().getFullYear()} GBG – Glimora Beauty Glow 
 						</p>
 					</div>
 				</div>

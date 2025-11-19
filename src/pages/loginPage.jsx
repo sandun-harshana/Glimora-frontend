@@ -133,7 +133,7 @@ export default function LoginPage() {
 
 					<p className="text-white/90 text-sm font-semibold backdrop-blur-sm bg-white/10 rounded-xl p-3 border border-white/20">
 						© {new Date().getFullYear()} GBG – Glimora Beauty Glow. All rights
-						reserved. 💖
+						reserved. 
 					</p>
 				</div>
 
@@ -154,7 +154,7 @@ export default function LoginPage() {
 									Welcome Back! ✨
 								</h2>
 								<p className="text-gray-600 text-sm font-medium">
-									Log in to continue your beauty journey and checkout faster. 🌟
+									Log in to continue your beauty journey and checkout faster. 
 								</p>
 							</div>
 
@@ -164,7 +164,7 @@ export default function LoginPage() {
 										htmlFor="email"
 										className="text-sm font-bold text-gray-700 flex items-center gap-2"
 									>
-										<span className="text-purple-600">📧</span> Email address
+										<span className="text-purple-600"></span> Email address
 									</label>
 									<input
 										id="email"
@@ -181,7 +181,7 @@ export default function LoginPage() {
 										htmlFor="password"
 										className="text-sm font-bold text-gray-700 flex items-center gap-2"
 									>
-										<span className="text-pink-600">🔒</span> Password
+										<span className="text-pink-600"></span> Password
 									</label>
 									<input
 										id="password"
@@ -198,7 +198,7 @@ export default function LoginPage() {
 										to="/forget-password"
 										className="text-purple-600 hover:text-pink-600 font-bold hover:underline underline-offset-4 transition-colors"
 									>
-										Forgot password? 💭
+										Forgot password? 
 									</Link>
 								</div>
 
@@ -207,7 +207,7 @@ export default function LoginPage() {
 									className="w-full h-12 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white font-bold text-lg shadow-xl shadow-purple-300/50 hover:shadow-2xl hover:shadow-pink-400/50 hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
 								>
 									<span className="relative z-10 flex items-center justify-center gap-2">
-										Login <span className="group-hover:translate-x-1 transition-transform">🚀</span>
+										Login <span className="group-hover:translate-x-1 transition-transform"></span>
 									</span>
 									<div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-orange-600 to-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 								</button>
@@ -239,14 +239,14 @@ export default function LoginPage() {
 									to="/register"
 									className="text-transparent bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-bold hover:from-pink-600 hover:to-orange-600 transition-all"
 								>
-									Create your account ✨
+									Create your account 
 								</Link>
 							</div>
 						</div>
 
 						{/* Small footer for mobile */}
 						<p className="mt-6 text-center text-white/95 text-xs lg:hidden font-semibold backdrop-blur-sm bg-white/10 rounded-xl p-3 border border-white/20">
-							© {new Date().getFullYear()} GBG – Glimora Beauty Glow 💖
+							© {new Date().getFullYear()} GBG – Glimora Beauty Glow 
 						</p>
 					</div>
 				</div>
