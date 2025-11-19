@@ -11,6 +11,17 @@ export default function WishlistPage() {
 
 	useEffect(() => {
 		loadWishlist();
+		
+		// Listen for wishlist updates from product cards
+		const handleWishlistUpdate = () => {
+			loadWishlist();
+		};
+		
+		window.addEventListener('wishlist-updated', handleWishlistUpdate);
+		
+		return () => {
+			window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+		};
 	}, []);
 
 	const loadWishlist = async () => {
@@ -20,7 +31,12 @@ export default function WishlistPage() {
 			// If not logged in, load from localStorage
 			const savedWishlist = localStorage.getItem("wishlist");
 			if (savedWishlist) {
-				setWishlist(JSON.parse(savedWishlist));
+				try {
+					setWishlist(JSON.parse(savedWishlist));
+				} catch (e) {
+					console.error("Error parsing wishlist:", e);
+					setWishlist([]);
+				}
 			}
 			setIsLoading(false);
 			return;
@@ -31,17 +47,28 @@ export default function WishlistPage() {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 			
-			// Format the wishlist data to match the expected structure
-			const formattedWishlist = res.data.wishlist.map(item => ({
-				...item.productId,
-				_id: item.productId._id,
-				addedAt: item.addedAt
-			}));
-			
-			setWishlist(formattedWishlist);
+			// Check if wishlist exists and has items
+			if (res.data && res.data.wishlist && Array.isArray(res.data.wishlist)) {
+				// Format the wishlist data to match the expected structure
+				const formattedWishlist = res.data.wishlist
+					.filter(item => item.productId) // Filter out null products
+					.map(item => ({
+						...item.productId,
+						_id: item.productId._id,
+						addedAt: item.addedAt
+					}));
+				
+				setWishlist(formattedWishlist);
+			} else {
+				setWishlist([]);
+			}
 		} catch (error) {
 			console.error("Error loading wishlist:", error);
-			toast.error("Failed to load wishlist");
+			// Don't show error toast if just not authenticated
+			if (error.response?.status !== 401) {
+				toast.error("Failed to load wishlist");
+			}
+			setWishlist([]);
 		} finally {
 			setIsLoading(false);
 		}
@@ -65,8 +92,8 @@ export default function WishlistPage() {
 				{ headers: { Authorization: `Bearer ${token}` } }
 			);
 			
-			const updatedWishlist = wishlist.filter((item) => item._id !== productId);
-			setWishlist(updatedWishlist);
+			// Reload wishlist to ensure sync
+			await loadWishlist();
 			toast.success("Removed from wishlist");
 		} catch (error) {
 			console.error("Error removing from wishlist:", error);
@@ -105,7 +132,8 @@ export default function WishlistPage() {
 				{ headers: { Authorization: `Bearer ${token}` } }
 			);
 			
-			setWishlist([]);
+			// Reload wishlist to ensure sync
+			await loadWishlist();
 			toast.success("Wishlist cleared");
 		} catch (error) {
 			console.error("Error clearing wishlist:", error);

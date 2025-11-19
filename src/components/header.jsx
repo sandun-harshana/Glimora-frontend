@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BsCart3 } from "react-icons/bs";
 import { MdMenu, MdClose } from "react-icons/md";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserCircle, FaHeart } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import NotificationBell from "./notificationBell";
@@ -41,7 +41,7 @@ export default function Header() {
 	};
 
 	return (
-		<header className="w-full bg-pink-200 h-[100px] text-secondary shadow-md border-b-2 border-accent/20 relative z-50">
+		<header className="w-full bg-purple-400 h-[100px] text-secondary shadow-md border-b-2 border-accent/20 relative z-50">
 			<div className="max-w-[1600px] mx-auto h-full flex items-center justify-between px-6 lg:px-10 relative">
 				{/* Logo - Desktop */}
 				<Link to="/" className="hidden lg:flex items-center gap-3 group">
@@ -125,96 +125,96 @@ export default function Header() {
 									onClick={() => setIsSidebarOpen(false)}
 									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
 										isActive('/') 
-											? 'border-pink-500 bg-gradient-to-r from-pink-100 to-transparent text-pink-600' 
+											? 'border-pink-400 bg-pink-100 text-pink-700' 
 											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
 									}`}
 								>
 									🏠 Home
 								</Link>
-								<Link
-									to="/products"
-									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-										isActive('/products') 
-											? 'border-purple-500 bg-gradient-to-r from-purple-100 to-transparent text-purple-600' 
-											: 'border-transparent hover:border-purple-300 hover:bg-purple-50 text-secondary'
-									}`}
-								>
-									🛍️ Products
-								</Link>
-								<Link
-									to="/wishlist"
-									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-										isActive('/wishlist') 
-											? 'border-pink-500 bg-gradient-to-r from-pink-100 to-transparent text-pink-600' 
-											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
-									}`}
-								>
-									💖 Wishlist
-								</Link>
-								<Link
-									to="/my-orders"
-									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-										isActive('/my-orders') 
-											? 'border-orange-500 bg-gradient-to-r from-orange-100 to-transparent text-orange-600' 
-											: 'border-transparent hover:border-orange-300 hover:bg-orange-50 text-secondary'
-									}`}
-								>
-									📦 My Orders
-								</Link>
-								<Link
-									to="/messages"
-									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-										isActive('/messages') 
-											? 'border-blue-500 bg-gradient-to-r from-blue-100 to-transparent text-blue-600' 
-											: 'border-transparent hover:border-blue-300 hover:bg-blue-50 text-secondary'
-									}`}
-								>
-									💬 Messages
-								</Link>
-								<Link
-									to="/profile"
-									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-										isActive('/profile') 
-											? 'border-purple-500 bg-gradient-to-r from-purple-100 to-transparent text-purple-600' 
-											: 'border-transparent hover:border-purple-300 hover:bg-purple-50 text-secondary'
-									}`}
-								>
-									👤 Profile
-								</Link>
-								<Link
-									to="/rewards"
-									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-										isActive('/rewards') 
-											? 'border-yellow-500 bg-gradient-to-r from-yellow-100 to-transparent text-yellow-600' 
-											: 'border-transparent hover:border-yellow-300 hover:bg-yellow-50 text-secondary'
-									}`}
-								>
-									🎁 Rewards
-								</Link>
-								<Link
-									to="/help"
-									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-										isActive('/help') 
-											? 'border-green-500 bg-gradient-to-r from-green-100 to-transparent text-green-600' 
-											: 'border-transparent hover:border-green-300 hover:bg-green-50 text-secondary'
-									}`}
-								>
-									❓ Help Center
-								</Link>
+							<Link
+								to="/products"
+								onClick={() => setIsSidebarOpen(false)}
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									isActive('/products') 
+										? 'border-pink-400 bg-pink-100 text-pink-700' 
+										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+								}`}
+							>
+								🛍️ Products
+							</Link>
+							<Link
+								to="/wishlist"
+								onClick={() => setIsSidebarOpen(false)}
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									isActive('/wishlist') 
+										? 'border-pink-400 bg-pink-100 text-pink-700' 
+										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+								}`}
+							>
+								💖 Wishlist
+							</Link>
+							<Link
+								to="/my-orders"
+								onClick={() => setIsSidebarOpen(false)}
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									isActive('/my-orders') 
+										? 'border-pink-400 bg-pink-100 text-pink-700' 
+										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+								}`}
+							>
+								📦 My Orders
+							</Link>
+							<Link
+								to="/messages"
+								onClick={() => setIsSidebarOpen(false)}
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									isActive('/messages') 
+										? 'border-pink-400 bg-pink-100 text-pink-700' 
+										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+								}`}
+							>
+								💬 Messages
+							</Link>
+							<Link
+								to="/profile"
+								onClick={() => setIsSidebarOpen(false)}
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									isActive('/profile') 
+										? 'border-pink-400 bg-pink-100 text-pink-700' 
+										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+								}`}
+							>
+								👤 Profile
+							</Link>
+							<Link
+								to="/rewards"
+								onClick={() => setIsSidebarOpen(false)}
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									isActive('/rewards') 
+										? 'border-pink-400 bg-pink-100 text-pink-700' 
+										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+								}`}
+							>
+								🎁 Rewards
+							</Link>
+							<Link
+								to="/help"
+								onClick={() => setIsSidebarOpen(false)}
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									isActive('/help') 
+										? 'border-pink-400 bg-pink-100 text-pink-700' 
+										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+								}`}
+							>
+								❓ Help Center
+							</Link>
 								<Link
 									to="/about"
 									onClick={() => setIsSidebarOpen(false)}
 									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
 										isActive('/about') 
-											? 'border-indigo-500 bg-gradient-to-r from-indigo-100 to-transparent text-indigo-600' 
-											: 'border-transparent hover:border-indigo-300 hover:bg-indigo-50 text-secondary'
+											? 'border-pink-400 bg-pink-100 text-pink-700' 
+											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
 									}`}
 								>
 									ℹ️ About
@@ -224,7 +224,7 @@ export default function Header() {
 									onClick={() => setIsSidebarOpen(false)}
 									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
 										isActive('/contact') 
-											? 'border-pink-500 bg-gradient-to-r from-pink-100 to-transparent text-pink-600' 
+											? 'border-pink-400 bg-pink-100 text-pink-700' 
 											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
 									}`}
 								>
@@ -235,8 +235,8 @@ export default function Header() {
 									onClick={() => setIsSidebarOpen(false)}
 									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
 										isActive('/cart') 
-											? 'border-orange-500 bg-gradient-to-r from-orange-100 to-transparent text-orange-600' 
-											: 'border-transparent hover:border-orange-300 hover:bg-orange-50 text-secondary'
+											? 'border-pink-400 bg-pink-100 text-pink-700' 
+											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
 									}`}
 								>
 									🛒 Cart
@@ -254,7 +254,7 @@ export default function Header() {
 						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
 							isActive('/') 
 								? 'bg-accent text-white shadow-md' 
-								: 'hover:bg-accent/10 text-secondary hover:text-accent'
+								: 'hover:bg-accent/10 text-secondary hover:text-white'
 						}`}
 					>
 						Home

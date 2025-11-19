@@ -43,8 +43,14 @@ export default function MessagesPage() {
 				setOpenMenuId(null);
 			}
 		};
-		document.addEventListener('click', handleClickOutside);
-		return () => document.removeEventListener('click', handleClickOutside);
+		
+		if (openMenuId) {
+			document.addEventListener('click', handleClickOutside);
+		}
+		
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
 	}, [openMenuId]);
 
 	const fetchMessages = async () => {
@@ -374,6 +380,16 @@ export default function MessagesPage() {
 											<h3 className="text-lg font-bold text-secondary mb-1 group-hover:text-accent transition-colors">
 												{msg.subject}
 											</h3>
+											{msg.senderRole === "admin" && (
+												<div className="flex items-center gap-2 mb-2">
+													<span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">
+														FROM ADMIN
+													</span>
+													<span className="text-xs text-secondary/60">
+														{msg.senderName}
+													</span>
+												</div>
+											)}
 											<p className="text-sm text-secondary/60 line-clamp-2 mb-2">
 												{msg.message}
 											</p>
@@ -397,35 +413,36 @@ export default function MessagesPage() {
 										</div>
 
 										{/* Message Options Menu */}
-										<div className="relative message-options-menu">
+										<div className="relative message-options-menu" style={{ zIndex: 50 }}>
 											<button
 												onClick={(e) => {
 													e.stopPropagation();
 													setOpenMenuId(openMenuId === msg._id ? null : msg._id);
 												}}
-												className="p-2 rounded-lg hover:bg-secondary/10 transition-colors"
+												className="p-3 rounded-lg bg-secondary/5 hover:bg-accent/20 transition-colors border-2 border-secondary/20 hover:border-accent"
+												title="Message options"
 											>
-												<FaEllipsisV className="text-secondary/60" />
+												<FaEllipsisV className="text-secondary text-lg" />
 											</button>
 
 											{openMenuId === msg._id && (
-												<div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border-2 border-secondary/10 z-10 overflow-hidden">
+												<div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border-2 border-accent/20 overflow-hidden" style={{ zIndex: 100 }}>
 													<button
 														onClick={(e) => {
 															e.stopPropagation();
 															handleToggleStar(msg._id);
 														}}
-														className="w-full px-4 py-3 text-left text-sm font-semibold text-secondary hover:bg-yellow-50 transition-colors flex items-center gap-3"
+														className="w-full px-4 py-3 text-left text-sm font-semibold text-secondary hover:bg-yellow-50 transition-colors flex items-center gap-3 border-b border-secondary/10"
 													>
 														{msg.starred ? (
 															<>
-																<FaRegStar className="text-yellow-500" />
-																Unstar
+																<FaRegStar className="text-yellow-500 text-lg" />
+																Unstar Message
 															</>
 														) : (
 															<>
-																<FaStar className="text-yellow-500" />
-																Star
+																<FaStar className="text-yellow-500 text-lg" />
+																Star Message
 															</>
 														)}
 													</button>
@@ -434,17 +451,17 @@ export default function MessagesPage() {
 															e.stopPropagation();
 															handleToggleArchive(msg._id);
 														}}
-														className="w-full px-4 py-3 text-left text-sm font-semibold text-secondary hover:bg-orange-50 transition-colors flex items-center gap-3"
+														className="w-full px-4 py-3 text-left text-sm font-semibold text-secondary hover:bg-orange-50 transition-colors flex items-center gap-3 border-b border-secondary/10"
 													>
 														{msg.archived ? (
 															<>
-																<MdUnarchive className="text-orange-500" />
-																Unarchive
+																<MdUnarchive className="text-orange-500 text-lg" />
+																Unarchive Message
 															</>
 														) : (
 															<>
-																<FaArchive className="text-orange-500" />
-																Archive
+																<FaArchive className="text-orange-500 text-lg" />
+																Archive Message
 															</>
 														)}
 													</button>
@@ -453,10 +470,10 @@ export default function MessagesPage() {
 															e.stopPropagation();
 															handleDeleteMessage(msg._id);
 														}}
-														className="w-full px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3 border-t border-secondary/10"
+														className="w-full px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3"
 													>
-														<FaTrash />
-														Delete
+														<FaTrash className="text-lg" />
+														Delete Message
 													</button>
 												</div>
 											)}
@@ -576,8 +593,19 @@ export default function MessagesPage() {
 								</div>
 								<div className="flex items-center gap-2">
 									<button
+										onClick={() => handleToggleArchive(selectedMessage._id)}
+										className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-orange-50 flex items-center justify-center transition-colors border-2 border-transparent hover:border-orange-300"
+										title={selectedMessage.archived ? "Unarchive" : "Archive"}
+									>
+										{selectedMessage.archived ? (
+											<MdUnarchive className="text-orange-500 text-lg" />
+										) : (
+											<FaArchive className="text-orange-500 text-lg" />
+										)}
+									</button>
+									<button
 										onClick={() => handleToggleStar(selectedMessage._id)}
-										className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-yellow-50 flex items-center justify-center transition-colors"
+										className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-yellow-50 flex items-center justify-center transition-colors border-2 border-transparent hover:border-yellow-300"
 										title={selectedMessage.starred ? "Unstar" : "Star"}
 									>
 										{selectedMessage.starred ? (
@@ -587,8 +615,18 @@ export default function MessagesPage() {
 										)}
 									</button>
 									<button
+										onClick={() => {
+											handleDeleteMessage(selectedMessage._id);
+										}}
+										className="w-10 h-10 rounded-full bg-red-50 hover:bg-red-100 flex items-center justify-center transition-colors border-2 border-transparent hover:border-red-300"
+										title="Delete message"
+									>
+										<FaTrash className="text-red-500 text-lg" />
+									</button>
+									<button
 										onClick={() => setShowMessageDetailModal(false)}
 										className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 flex items-center justify-center transition-colors"
+										title="Close"
 									>
 										<FaTimes />
 									</button>
@@ -600,14 +638,28 @@ export default function MessagesPage() {
 							</h2>
 
 							{/* Original Message */}
-							<div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-6 mb-6 border-2 border-primary/20">
+							<div className={`rounded-2xl p-6 mb-6 border-2 ${
+								selectedMessage.senderRole === "admin"
+									? "bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200"
+									: "bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20"
+							}`}>
 								<div className="flex items-center gap-3 mb-3">
-									<div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center text-white font-bold">
+									<div className={`w-10 h-10 ${
+										selectedMessage.senderRole === "admin" ? "bg-blue-500" : "bg-accent"
+									} rounded-full flex items-center justify-center text-white font-bold`}>
 										{selectedMessage.senderName.charAt(0)}
 									</div>
 									<div>
 										<p className="font-bold text-secondary">
 											{selectedMessage.senderName}
+											{selectedMessage.senderRole === "admin" && (
+												<span className="ml-2 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
+													Admin
+												</span>
+											)}
+										</p>
+										<p className="text-xs text-secondary/60">
+											{selectedMessage.senderEmail}
 										</p>
 										<p className="text-xs text-secondary/60">
 											{new Date(selectedMessage.createdAt).toLocaleString()}

@@ -2,32 +2,116 @@ import { Link } from "react-router-dom";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 export default function ProductCard(props) {
 	const product = props.product;
 	const [isInWishlist, setIsInWishlist] = useState(false);
 
 	useEffect(() => {
-		const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-		setIsInWishlist(wishlist.some(item => item._id === product._id));
+		checkWishlistStatus();
+		
+		// Listen for wishlist updates
+		const handleWishlistUpdate = () => {
+			checkWishlistStatus();
+		};
+		
+		window.addEventListener('wishlist-updated', handleWishlistUpdate);
+		
+		return () => {
+			window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+		};
 	}, [product._id]);
 
-	const toggleWishlist = (e) => {
+	const checkWishlistStatus = async () => {
+		const token = localStorage.getItem("token");
+		
+		if (!token) {
+			// Check localStorage for non-logged users
+			const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+			setIsInWishlist(wishlist.some(item => item._id === product._id));
+			return;
+		}
+
+		// Check backend for logged-in users
+		try {
+			const res = await axios.get(import.meta.env.VITE_API_URL + "/api/wishlist", {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			
+			if (res.data && res.data.wishlist) {
+				setIsInWishlist(res.data.wishlist.some(item => item.productId?._id === product._id));
+			}
+		} catch (error) {
+			console.error("Error checking wishlist:", error);
+			// If authentication fails, fall back to localStorage
+			if (error.response?.status === 401) {
+				localStorage.removeItem("token");
+				const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+				setIsInWishlist(wishlist.some(item => item._id === product._id));
+			}
+		}
+	};
+
+	const toggleWishlist = async (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 		
-		const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+		const token = localStorage.getItem("token");
 		
-		if (isInWishlist) {
-			const updatedWishlist = wishlist.filter(item => item._id !== product._id);
-			localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
-			setIsInWishlist(false);
-			toast.success("Removed from wishlist");
-		} else {
-			wishlist.push(product);
-			localStorage.setItem("wishlist", JSON.stringify(wishlist));
-			setIsInWishlist(true);
-			toast.success("Added to wishlist");
+		if (!token) {
+			// Use localStorage for non-logged users
+			const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+			
+			if (isInWishlist) {
+				const updatedWishlist = wishlist.filter(item => item._id !== product._id);
+				localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+				setIsInWishlist(false);
+				toast.success("Removed from wishlist");
+				window.dispatchEvent(new Event('wishlist-updated'));
+			} else {
+				wishlist.push(product);
+				localStorage.setItem("wishlist", JSON.stringify(wishlist));
+				setIsInWishlist(true);
+				toast.success("Added to wishlist");
+				window.dispatchEvent(new Event('wishlist-updated'));
+			}
+			return;
+		}
+
+		// Use backend API for logged-in users
+		try {
+			if (isInWishlist) {
+				await axios.delete(
+					import.meta.env.VITE_API_URL + `/api/wishlist/${product._id}`,
+					{ headers: { Authorization: `Bearer ${token}` } }
+				);
+				setIsInWishlist(false);
+				toast.success("Removed from wishlist");
+				window.dispatchEvent(new Event('wishlist-updated'));
+			} else {
+				await axios.post(
+					import.meta.env.VITE_API_URL + "/api/wishlist",
+					{ productId: product._id },
+					{ headers: { Authorization: `Bearer ${token}` } }
+				);
+				setIsInWishlist(true);
+				toast.success("Added to wishlist");
+				window.dispatchEvent(new Event('wishlist-updated'));
+			}
+		} catch (error) {
+			console.error("Error toggling wishlist:", error);
+			
+			// Handle specific error cases
+			if (error.response?.status === 401) {
+				localStorage.removeItem("token");
+				toast.error("Please login to use wishlist");
+			} else if (error.response?.status === 400) {
+				toast.error(error.response?.data?.message || "Item already in wishlist");
+				checkWishlistStatus(); // Refresh status
+			} else {
+				toast.error("Failed to update wishlist. Please try again.");
+			}
 		}
 	};
 

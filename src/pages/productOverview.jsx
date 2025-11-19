@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { Loader } from "../components/loader";
 import ImageSlider from "../components/imageSlider";
 import { addToCart } from "../utils/cart";
-import { FaShoppingCart, FaBolt, FaTag, FaBoxOpen } from "react-icons/fa";
+import { FaShoppingCart, FaBolt, FaTag, FaBoxOpen, FaHeart, FaRegHeart } from "react-icons/fa";
 import { BiCategory } from "react-icons/bi";
 
 export default function ProductOverview() {
@@ -13,18 +13,108 @@ export default function ProductOverview() {
 	//laoding, success, error
 	const [status, setStatus] = useState("loading");
 	const [product, setProduct] = useState(null);
+	const [isInWishlist, setIsInWishlist] = useState(false);
+
 	useEffect(() => {
 		axios
 			.get(import.meta.env.VITE_API_URL + "/api/products/" + params.id)
 			.then((res) => {
 				setProduct(res.data);
 				setStatus("success");
+				checkWishlistStatus(res.data._id);
 			})
 			.catch(() => {
 				toast.error("Failed to fetch product details");
 				setStatus("error");
 			});
 	}, []);
+
+	const checkWishlistStatus = async (productId) => {
+		const token = localStorage.getItem("token");
+		
+		if (!token) {
+			// Check localStorage for non-logged users
+			const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+			setIsInWishlist(wishlist.some(item => item._id === productId));
+			return;
+		}
+
+		// Check backend for logged-in users
+		try {
+			const res = await axios.get(import.meta.env.VITE_API_URL + "/api/wishlist", {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			
+			if (res.data && res.data.wishlist) {
+				setIsInWishlist(res.data.wishlist.some(item => item.productId?._id === productId));
+			}
+		} catch (error) {
+			console.error("Error checking wishlist:", error);
+			// If authentication fails, fall back to localStorage
+			if (error.response?.status === 401) {
+				localStorage.removeItem("token");
+				const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+				setIsInWishlist(wishlist.some(item => item._id === productId));
+			}
+		}
+	};
+
+	const toggleWishlist = async () => {
+		if (!product) return;
+		
+		const token = localStorage.getItem("token");
+		
+		if (!token) {
+			// Use localStorage for non-logged users
+			const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+			
+			if (isInWishlist) {
+				const updatedWishlist = wishlist.filter(item => item._id !== product._id);
+				localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+				setIsInWishlist(false);
+				toast.success("Removed from wishlist");
+			} else {
+				wishlist.push(product);
+				localStorage.setItem("wishlist", JSON.stringify(wishlist));
+				setIsInWishlist(true);
+				toast.success("Added to wishlist");
+			}
+			return;
+		}
+
+		// Use backend API for logged-in users
+		try {
+			if (isInWishlist) {
+				await axios.delete(
+					import.meta.env.VITE_API_URL + `/api/wishlist/${product._id}`,
+					{ headers: { Authorization: `Bearer ${token}` } }
+				);
+				setIsInWishlist(false);
+				toast.success("Removed from wishlist");
+			} else {
+				await axios.post(
+					import.meta.env.VITE_API_URL + "/api/wishlist",
+					{ productId: product._id },
+					{ headers: { Authorization: `Bearer ${token}` } }
+				);
+				setIsInWishlist(true);
+				toast.success("Added to wishlist");
+			}
+		} catch (error) {
+			console.error("Error toggling wishlist:", error);
+			
+			// Handle specific error cases
+			if (error.response?.status === 401) {
+				localStorage.removeItem("token");
+				toast.error("Please login to use wishlist");
+			} else if (error.response?.status === 400) {
+				toast.error(error.response?.data?.message || "Item already in wishlist");
+				checkWishlistStatus(product._id); // Refresh status
+			} else {
+				toast.error("Failed to update wishlist. Please try again.");
+			}
+		}
+	};
 
 	return (
 		<div className="w-full min-h-[calc(100vh-100px)] text-secondary bg-gradient-to-b from-primary via-white to-primary/50">
@@ -125,6 +215,22 @@ export default function ProductOverview() {
 						{/* Action Buttons */}
 						<div className="sticky bottom-4 bg-white rounded-3xl shadow-xl p-6">
 							<div className="flex gap-4">
+								<button
+									onClick={toggleWishlist}
+									className="h-14 px-6 border-2 border-accent text-accent font-semibold rounded-2xl hover:bg-accent hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+								>
+									{isInWishlist ? (
+										<>
+											<FaHeart className="text-xl" />
+											<span className="hidden sm:inline">In Wishlist</span>
+										</>
+									) : (
+										<>
+											<FaRegHeart className="text-xl" />
+											<span className="hidden sm:inline">Add to Wishlist</span>
+										</>
+									)}
+								</button>
 								<button
 									className="flex-1 h-14 bg-gradient-to-r from-accent to-accent/80 text-white font-semibold rounded-2xl hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
 									onClick={() => {

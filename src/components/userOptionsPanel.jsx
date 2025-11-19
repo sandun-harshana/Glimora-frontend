@@ -13,6 +13,7 @@ import {
 	FaBell,
 	FaEnvelope,
 	FaArrowLeft,
+	FaComments,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import axios from "axios";
@@ -108,6 +109,14 @@ export default function UserOptionsPanel({ isOpen, onClose }) {
 			show: !!user,
 		},
 		{
+			icon: <FaComments />,
+			label: "Messages",
+			path: "/messages",
+			color: "text-blue-600",
+			bgColor: "bg-blue-100",
+			show: !!user,
+		},
+		{
 			icon: <FaShoppingCart />,
 			label: "Shopping Cart",
 			path: "/cart",
@@ -137,6 +146,14 @@ export default function UserOptionsPanel({ isOpen, onClose }) {
 			path: "/help",
 			color: "text-indigo-600",
 			bgColor: "bg-indigo-100",
+			show: true,
+		},
+		{
+			icon: <FaEnvelope />,
+			label: "Contact Us",
+			path: "/contact",
+			color: "text-teal-600",
+			bgColor: "bg-teal-100",
 			show: true,
 		},
 		{

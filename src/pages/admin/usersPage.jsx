@@ -7,6 +7,7 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader } from "../../components/loader";
 import { MdOutlineAdminPanelSettings, MdVerified } from "react-icons/md";
+import { BiMessageDetail } from "react-icons/bi";
 
 function UserBlockConfirm(props) {
 	const email = props.user.email;
@@ -80,11 +81,160 @@ function UserBlockConfirm(props) {
 	);
 }
 
+function MessageUserModal({ user, close, refresh }) {
+	const [formData, setFormData] = useState({
+		category: "general",
+		subject: "",
+		message: ""
+	});
+	const [isSending, setIsSending] = useState(false);
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		
+		if (!formData.subject.trim() || !formData.message.trim()) {
+			toast.error("Subject and message are required");
+			return;
+		}
+
+		setIsSending(true);
+		const token = localStorage.getItem("token");
+
+		try {
+			await axios.post(
+				import.meta.env.VITE_API_URL + "/api/messages/admin/send",
+				{
+					recipientEmail: user.email,
+					recipientName: `${user.firstName} ${user.lastName}`,
+					category: formData.category,
+					subject: formData.subject,
+					message: formData.message
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				}
+			);
+			
+			toast.success("Message sent successfully");
+			close();
+			if (refresh) refresh();
+		} catch (error) {
+			console.error("Error sending message:", error);
+			toast.error(error.response?.data?.message || "Failed to send message");
+		} finally {
+			setIsSending(false);
+		}
+	};
+
+	return (
+		<div className="fixed left-0 top-0 w-full h-screen bg-black/60 backdrop-blur-sm z-[100] flex justify-center items-center p-4">
+			<div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl relative p-8 border border-accent/20 max-h-[90vh] overflow-y-auto">
+				<button 
+					onClick={close} 
+					className="absolute right-4 top-4 w-10 h-10 bg-accent/10 rounded-full text-accent flex justify-center items-center font-bold hover:bg-accent hover:text-white transition-all duration-300 shadow-md hover:shadow-lg z-10"
+				>
+					<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+				
+				<div className="flex flex-col gap-6">
+					<div className="flex items-center gap-4">
+						<div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
+							<BiMessageDetail className="text-white text-2xl" />
+						</div>
+						<div>
+							<h3 className="text-2xl font-bold text-secondary">Send Message</h3>
+							<p className="text-secondary/70">
+								To: <span className="font-semibold text-accent">{user.firstName} {user.lastName}</span>
+								<span className="text-sm ml-2">({user.email})</span>
+							</p>
+						</div>
+					</div>
+
+					<form onSubmit={handleSubmit} className="flex flex-col gap-4">
+						{/* Category */}
+						<div>
+							<label className="block text-sm font-semibold text-secondary mb-2">
+								Category
+							</label>
+							<select
+								value={formData.category}
+								onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+								className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+							>
+								<option value="general">General</option>
+								<option value="support">Support</option>
+								<option value="order">Order</option>
+								<option value="account">Account</option>
+								<option value="other">Other</option>
+							</select>
+						</div>
+
+						{/* Subject */}
+						<div>
+							<label className="block text-sm font-semibold text-secondary mb-2">
+								Subject <span className="text-red-500">*</span>
+							</label>
+							<input
+								type="text"
+								value={formData.subject}
+								onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+								placeholder="Enter message subject"
+								className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+								required
+							/>
+						</div>
+
+						{/* Message */}
+						<div>
+							<label className="block text-sm font-semibold text-secondary mb-2">
+								Message <span className="text-red-500">*</span>
+							</label>
+							<textarea
+								value={formData.message}
+								onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+								placeholder="Enter your message"
+								rows={6}
+								className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
+								required
+							/>
+						</div>
+
+						{/* Buttons */}
+						<div className="flex gap-4 mt-2">
+							<button 
+								type="button"
+								onClick={close} 
+								className="flex-1 bg-secondary/5 hover:bg-secondary/10 text-secondary py-3 px-6 rounded-xl font-semibold transition-all duration-300 border border-secondary/20"
+								disabled={isSending}
+							>
+								Cancel
+							</button>
+							<button 
+								type="submit"
+								className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+								disabled={isSending}
+							>
+								{isSending ? "Sending..." : "Send Message"}
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export default function AdminUsersPage() {
 	const [users, setUsers] = useState([]);
 	const [isBlockConfirmVisible, setIsBlockConfirmVisible] = useState(false);
 	const [userToBlock, setUserToBlock] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isMessageModalVisible, setIsMessageModalVisible] = useState(false);
+	const [userToMessage, setUserToMessage] = useState(null);
 
 	const navigate = useNavigate();
 
@@ -120,6 +270,19 @@ export default function AdminUsersPage() {
 					user={userToBlock}
 					close={() => {
 						setIsBlockConfirmVisible(false);
+					}}
+				/>
+			)}
+			
+			{isMessageModalVisible && userToMessage && (
+				<MessageUserModal
+					user={userToMessage}
+					close={() => {
+						setIsMessageModalVisible(false);
+						setUserToMessage(null);
+					}}
+					refresh={() => {
+						// Optional: refresh messages list if needed
 					}}
 				/>
 			)}
@@ -250,6 +413,17 @@ export default function AdminUsersPage() {
 
 												<td className="px-6 py-4">
 													<div className="flex items-center justify-center gap-2">
+														<button
+															onClick={() => {
+																setUserToMessage(user);
+																setIsMessageModalVisible(true);
+															}}
+															className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-sm flex items-center gap-2"
+															title="Send message to user"
+														>
+															<BiMessageDetail size={16} />
+															Message
+														</button>
 														<button
 															onClick={()=>{
 																setUserToBlock(user)
