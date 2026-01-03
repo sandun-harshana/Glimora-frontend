@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { FaHeart, FaShoppingCart, FaTrash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { FaHeart, FaShoppingCart, FaTrash, FaArrowLeft } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { Loader } from "../components/loader";
 
 export default function WishlistPage() {
+	const navigate = useNavigate();
 	const [wishlist, setWishlist] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		loadWishlist();
@@ -146,8 +147,17 @@ export default function WishlistPage() {
 	}
 
 	return (
-		<div className="w-full min-h-screen bg-gradient-to-br from-primary/30 via-white to-primary/20 py-12 px-4">
+		<div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30 py-12 px-4">
 			<div className="max-w-[1400px] mx-auto">
+				{/* Back Button */}
+				<button
+					onClick={() => navigate(-1)}
+					className="mb-6 flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-secondary rounded-xl shadow-md hover:shadow-lg transition-all"
+				>
+					<FaArrowLeft />
+					<span className="font-semibold">Back</span>
+				</button>
+
 				{/* Header */}
 				<div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-accent/20">
 					<div className="flex items-center justify-between">

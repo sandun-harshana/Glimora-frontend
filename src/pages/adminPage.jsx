@@ -61,7 +61,7 @@ export default function AdminPage() {
 			}).catch(()=>{
 				toast.error("Session expired. Please login again");
 				localStorage.removeItem("token");
-				window.location.href = "/login";
+				navigate("/login");
 			});
 		},[navigate]
 	)

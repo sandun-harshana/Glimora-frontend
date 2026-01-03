@@ -1,18 +1,32 @@
 import { useState, useEffect } from "react";
-import { FaGift, FaStar, FaTrophy, FaCrown, FaShoppingBag } from "react-icons/fa";
+import { FaGift, FaStar, FaTrophy, FaCrown, FaShoppingBag, FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { Loader } from "../components/loader";
 import axios from "axios";
 
 export default function RewardsPage() {
+	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(true);
 	const [points, setPoints] = useState(0);
 	const [tier, setTier] = useState("Bronze");
+	const [discountRate, setDiscountRate] = useState(0);
 
 	useEffect(() => {
-		fetchOrdersAndCalculatePoints();
+		fetchMembershipInfo();
+
+		// Listen for new order events to update points in real-time
+		const handleOrderPlaced = () => {
+			fetchMembershipInfo();
+		};
+
+		window.addEventListener('order-placed', handleOrderPlaced);
+
+		return () => {
+			window.removeEventListener('order-placed', handleOrderPlaced);
+		};
 	}, []);
 
-	const fetchOrdersAndCalculatePoints = async () => {
+	const fetchMembershipInfo = async () => {
 		try {
 			const token = localStorage.getItem("token");
 			if (!token) {
@@ -20,34 +34,16 @@ export default function RewardsPage() {
 				return;
 			}
 
-			const res = await axios.get(import.meta.env.VITE_API_URL + "/api/orders/user", {
+			const res = await axios.get(import.meta.env.VITE_API_URL + "/api/users/membership", {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 
-			const userOrders = res.data || [];
-
-			// Calculate points (1 point per 100 LKR spent on delivered orders)
-			const totalSpent = userOrders
-				.filter((order) => order.status === "delivered")
-				.reduce((sum, order) => sum + (order.total || 0), 0);
-
-			const calculatedPoints = Math.floor(totalSpent / 100);
-			setPoints(calculatedPoints);
-
-			// Determine tier based on points
-			if (calculatedPoints >= 1000) {
-				setTier("Diamond");
-			} else if (calculatedPoints >= 500) {
-				setTier("Gold");
-			} else if (calculatedPoints >= 200) {
-				setTier("Silver");
-			} else {
-				setTier("Bronze");
-			}
-
+			setPoints(res.data.points);
+			setTier(res.data.membershipTier);
+			setDiscountRate(res.data.discountRate);
 			setIsLoading(false);
 		} catch (err) {
-			console.error("Error fetching rewards data:", err);
+			console.error("Error fetching membership info:", err);
 			setIsLoading(false);
 		}
 	};
@@ -88,25 +84,29 @@ export default function RewardsPage() {
 
 	const benefits = {
 		Bronze: [
+			"0% discount on all orders",
 			"1 point per LKR 100 spent",
 			"Exclusive member-only promotions",
 			"Birthday month special discount",
 		],
 		Silver: [
-			"1.2 points per LKR 100 spent",
+			"5% discount on all orders",
+			"1 point per LKR 100 spent",
 			"Priority customer support",
 			"Free shipping on orders over LKR 3,000",
 			"Early access to sales",
 		],
 		Gold: [
-			"1.5 points per LKR 100 spent",
+			"10% discount on all orders",
+			"1 point per LKR 100 spent",
 			"Free shipping on all orders",
 			"Exclusive product launches",
 			"15% birthday month discount",
 			"VIP customer support",
 		],
 		Diamond: [
-			"2 points per LKR 100 spent",
+			"15% discount on all orders",
+			"1 point per LKR 100 spent",
 			"Free express shipping",
 			"Personal beauty consultant",
 			"20% birthday month discount",
@@ -122,6 +122,15 @@ export default function RewardsPage() {
 	return (
 		<div className="w-full min-h-screen bg-gradient-to-br from-primary/30 via-white to-primary/20 py-12 px-4">
 			<div className="max-w-[1400px] mx-auto">
+				{/* Back Button */}
+				<button
+					onClick={() => navigate(-1)}
+					className="mb-6 flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-secondary rounded-xl shadow-md hover:shadow-lg transition-all"
+				>
+					<FaArrowLeft />
+					<span className="font-semibold">Back</span>
+				</button>
+
 				{/* Header */}
 				<div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-accent/20">
 					<div className="flex items-center gap-4">

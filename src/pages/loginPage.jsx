@@ -14,6 +14,7 @@ export default function LoginPage() {
 					token : response.access_token
 				}).then((res)=>{
 					localStorage.setItem("token",res.data.token)
+					window.dispatchEvent(new Event('user-logged-in'));
 					const user = res.data.user;
 					if(user.role == "admin"){
 						navigate("/admin");
@@ -52,6 +53,7 @@ export default function LoginPage() {
 				{ email : email.trim(), password : password }
 			);
             localStorage.setItem("token",response.data.token)
+            window.dispatchEvent(new Event('user-logged-in'));
             toast.success("Login successful!");
 			const user = response.data.user;
 			if (user.role == "admin") { 

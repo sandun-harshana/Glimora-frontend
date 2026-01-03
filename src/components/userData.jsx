@@ -1,7 +1,9 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function UserData() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -57,7 +59,7 @@ export default function UserData() {
     localStorage.removeItem("token");
     setUser(null);
     setMenuOpen(false);
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (
@@ -73,12 +75,12 @@ export default function UserData() {
 
       {/* Logged-out CTA */}
       {!loading && !user && (
-        <a
-          href="/login"
+        <Link
+          to="/login"
           className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
         >
           Login
-        </a>
+        </Link>
       )}
 
       {/* Logged-in menu */}
@@ -149,15 +151,15 @@ export default function UserData() {
               className="absolute right-0 top-12 z-50 w-56 origin-top-right rounded-xl bg-white p-1.5 shadow-lg ring-1 ring-secondary/10 animate-in fade-in zoom-in duration-100"
             >
               <MenuItem
-                onClick={() => (window.location.href = "/settings")}
+                onClick={() => { navigate("/settings"); setMenuOpen(false); }}
                 label="Account Settings"
               />
               <MenuItem
-                onClick={() => (window.location.href = "/my-orders")}
+                onClick={() => { navigate("/my-orders"); setMenuOpen(false); }}
                 label="My Orders"
               />
               <MenuItem
-                onClick={() => (window.location.href = "/messages")}
+                onClick={() => { navigate("/messages"); setMenuOpen(false); }}
                 label="Messages"
               />
               <div className="my-1 h-px bg-secondary/10" />

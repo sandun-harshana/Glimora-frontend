@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BsCart3 } from "react-icons/bs";
 import { MdMenu, MdClose } from "react-icons/md";
-import { FaUserCircle, FaHeart } from "react-icons/fa";
+import { FaUserCircle, FaHeart, FaHome, FaShoppingBag, FaBox, FaComments, FaUser, FaGift, FaQuestionCircle, FaInfoCircle, FaEnvelope } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import NotificationBell from "./notificationBell";
@@ -11,13 +11,39 @@ export default function Header() {
 	const [isSideBarOpen, setIsSidebarOpen] = useState(false);
 	const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
 	const [user, setUser] = useState(null);
+	const [wishlistCount, setWishlistCount] = useState(0);
 	const location = useLocation();
 
 	const isActive = (path) => location.pathname === path;
 
 	useEffect(() => {
 		fetchUser();
+		fetchWishlistCount();
+
+		// Listen for wishlist updates
+		const handleWishlistUpdate = () => {
+			fetchWishlistCount();
+		};
+		
+		// Listen for user login
+		const handleUserLogin = () => {
+			fetchUser();
+			fetchWishlistCount();
+		};
+		
+		window.addEventListener('wishlist-updated', handleWishlistUpdate);
+		window.addEventListener('user-logged-in', handleUserLogin);
+
+		return () => {
+			window.removeEventListener('wishlist-updated', handleWishlistUpdate);
+			window.removeEventListener('user-logged-in', handleUserLogin);
+		};
 	}, []);
+
+	// Fetch wishlist count when user state changes
+	useEffect(() => {
+		fetchWishlistCount();
+	}, [user]);
 
 	const fetchUser = async () => {
 		const token = localStorage.getItem("token");
@@ -30,6 +56,27 @@ export default function Header() {
 			setUser(res.data);
 		} catch (err) {
 			console.error("Error fetching user:", err);
+		}
+	};
+
+	const fetchWishlistCount = async () => {
+		const token = localStorage.getItem("token");
+		
+		if (!token) {
+			// If not logged in, check localStorage
+			const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+			setWishlistCount(wishlist.length);
+			return;
+		}
+
+		try {
+			const res = await axios.get(import.meta.env.VITE_API_URL + "/api/wishlist", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			setWishlistCount(res.data.wishlist?.length || 0);
+		} catch (err) {
+			console.error("Error fetching wishlist:", err);
+			setWishlistCount(0);
 		}
 	};
 
@@ -102,9 +149,9 @@ export default function Header() {
 				{/* Mobile Sidebar */}
 				{isSideBarOpen && (
 					<div className="fixed inset-0 bg-secondary/80 backdrop-blur-sm z-[100] lg:hidden animate-fade-in">
-					<div className="w-[320px] bg-pink-200 h-full flex flex-col shadow-2xl animate-slide-in">
-						{/* Sidebar Header */}
-						<div className="h-[100px] w-full bg-accent flex items-center justify-between px-6 shadow-md border-b-2 border-accent/30">
+				<div className="w-[320px] bg-white h-full flex flex-col shadow-2xl animate-slide-in">
+					{/* Sidebar Header */}
+					<div className="h-[100px] w-full bg-gradient-to-br from-purple-400 via-purple-400 to-purple-500 flex items-center justify-between px-6 shadow-lg border-b border-purple-500/20">
 							<button
 								onClick={() => setIsSidebarOpen(false)}
 								className="p-2 hover:bg-white/20 rounded-xl transition-all duration-300 hover:scale-105 text-white"
@@ -123,123 +170,128 @@ export default function Header() {
 								<Link
 									to="/"
 									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 										isActive('/') 
-											? 'border-pink-400 bg-pink-100 text-pink-700' 
-											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+											? 'border-accent bg-accent/20 text-accent shadow-md' 
+											: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 									}`}
 								>
-									🏠 Home
+									<FaHome className="inline-block mr-3 text-lg" /> Home
 								</Link>
 							<Link
 								to="/products"
 								onClick={() => setIsSidebarOpen(false)}
-								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 									isActive('/products') 
-										? 'border-pink-400 bg-pink-100 text-pink-700' 
-										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+										? 'border-accent bg-accent/20 text-accent shadow-md' 
+										: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 								}`}
 							>
-								🛍️ Products
+								<FaShoppingBag className="inline-block mr-3 text-lg" /> Products
 							</Link>
 							<Link
 								to="/wishlist"
 								onClick={() => setIsSidebarOpen(false)}
-								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
-									isActive('/wishlist') 
-										? 'border-pink-400 bg-pink-100 text-pink-700' 
-										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
-								}`}
-							>
-								💖 Wishlist
+							className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 flex items-center justify-between ${
+								isActive('/wishlist') 
+									? 'border-accent bg-accent/20 text-accent shadow-md' 
+									: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
+							}`}
+						>
+							<span><FaHeart className="inline-block mr-3 text-lg" /> Wishlist</span>
+							{wishlistCount > 0 && (
+								<span className="bg-accent text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+										{wishlistCount}
+									</span>
+								)}
 							</Link>
 							<Link
 								to="/my-orders"
 								onClick={() => setIsSidebarOpen(false)}
-								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 									isActive('/my-orders') 
-										? 'border-pink-400 bg-pink-100 text-pink-700' 
-										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+										? 'border-accent bg-accent/20 text-accent shadow-md' 
+										: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 								}`}
 							>
-								📦 My Orders
+								<FaBox className="inline-block mr-3 text-lg" /> My Orders
 							</Link>
 							<Link
 								to="/messages"
 								onClick={() => setIsSidebarOpen(false)}
-								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 									isActive('/messages') 
-										? 'border-pink-400 bg-pink-100 text-pink-700' 
-										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+										? 'border-accent bg-accent/20 text-accent shadow-md' 
+										: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 								}`}
 							>
-								💬 Messages
+								<FaComments className="inline-block mr-3 text-lg" /> Messages
 							</Link>
 							<Link
 								to="/profile"
 								onClick={() => setIsSidebarOpen(false)}
-								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 									isActive('/profile') 
-										? 'border-pink-400 bg-pink-100 text-pink-700' 
-										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+										? 'border-accent bg-accent/20 text-accent shadow-md' 
+										: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 								}`}
 							>
-								👤 Profile
+								<FaUser className="inline-block mr-3 text-lg" /> Profile
 							</Link>
 							<Link
 								to="/rewards"
 								onClick={() => setIsSidebarOpen(false)}
-								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 									isActive('/rewards') 
-										? 'border-pink-400 bg-pink-100 text-pink-700' 
-										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+										? 'border-accent bg-accent/20 text-accent shadow-md' 
+										: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 								}`}
 							>
-								🎁 Rewards
+								<FaGift className="inline-block mr-3 text-lg" /> Rewards
 							</Link>
 							<Link
 								to="/help"
 								onClick={() => setIsSidebarOpen(false)}
-								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+								className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 									isActive('/help') 
-										? 'border-pink-400 bg-pink-100 text-pink-700' 
-										: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+										? 'border-accent bg-accent/20 text-accent shadow-md' 
+										: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 								}`}
 							>
-								❓ Help Center
+								<FaQuestionCircle className="inline-block mr-3 text-lg" /> Help Center
 							</Link>
 								<Link
 									to="/about"
 									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 										isActive('/about') 
-											? 'border-pink-400 bg-pink-100 text-pink-700' 
-											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+											? 'border-accent bg-accent/20 text-accent shadow-md' 
+											: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 									}`}
 								>
-									ℹ️ About
+									<FaInfoCircle className="inline-block mr-3 text-lg" /> About
 								</Link>
 								<Link
 									to="/contact"
 									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 										isActive('/contact') 
-											? 'border-pink-400 bg-pink-100 text-pink-700' 
-											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+											? 'border-accent bg-accent/20 text-accent shadow-md' 
+											: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 									}`}
 								>
-									📧 Contact
+									<FaEnvelope className="inline-block mr-3 text-lg" /> Contact
 								</Link>
 								<Link
 									to="/cart"
 									onClick={() => setIsSidebarOpen(false)}
-									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 ${
+									className={`px-6 py-4 font-semibold transition-all duration-300 border-l-4 rounded-r-xl mx-2 ${
 										isActive('/cart') 
-											? 'border-pink-400 bg-pink-100 text-pink-700' 
-											: 'border-transparent hover:border-pink-300 hover:bg-pink-50 text-secondary'
+											? 'border-accent bg-accent/20 text-accent shadow-md' 
+											: 'border-transparent hover:border-accent/50 hover:bg-accent/10 text-secondary'
 									}`}
 								>
-									🛒 Cart
+									<BsCart3 className="inline-block mr-3 text-lg" /> Cart
 								</Link>
 							</nav>
 
@@ -271,13 +323,18 @@ export default function Header() {
 					</Link>
 					<Link
 						to="/wishlist"
-						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 ${
+						className={`px-5 py-2 rounded-xl font-semibold transition-all duration-300 relative ${
 							isActive('/wishlist') 
 								? 'bg-accent text-white shadow-md' 
 								: 'hover:bg-accent/10 text-secondary hover:text-accent'
 						}`}
 					>
 						Wishlist
+						{wishlistCount > 0 && (
+							<span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+								{wishlistCount}
+							</span>
+						)}
 					</Link>
 					<Link
 						to="/help"

@@ -1,8 +1,8 @@
 import { CiCircleChevDown, CiCircleChevUp } from "react-icons/ci";
 import { BiTrash } from "react-icons/bi";
-import { FaShoppingBag, FaUser, FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaMobileAlt, FaUniversity } from "react-icons/fa";
+import { FaShoppingBag, FaUser, FaMapMarkerAlt, FaCreditCard, FaMoneyBillWave, FaMobileAlt, FaUniversity, FaCrown } from "react-icons/fa";
 import { MdPayment } from "react-icons/md";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -22,8 +22,29 @@ export default function CheckoutPage() {
 		paymentProof: null,
 	});
 	const [uploadingProof, setUploadingProof] = useState(false);
+	const [membershipTier, setMembershipTier] = useState("Bronze");
+	const [discountRate, setDiscountRate] = useState(0);
 
 	const [cart, setCart] = useState(location.state);
+
+	useEffect(() => {
+		fetchMembershipInfo();
+	}, []);
+
+	const fetchMembershipInfo = async () => {
+		const token = localStorage.getItem("token");
+		if (!token) return;
+
+		try {
+			const res = await axios.get(import.meta.env.VITE_API_URL + "/api/users/membership", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			setMembershipTier(res.data.membershipTier);
+			setDiscountRate(res.data.discountRate);
+		} catch (err) {
+			console.error("Error fetching membership info:", err);
+		}
+	};
 
 	function getTotal() {
 		let total = 0;
@@ -31,6 +52,14 @@ export default function CheckoutPage() {
 			total += item.price * item.quantity;
 		});
 		return total;
+	}
+
+	function getDiscount() {
+		return Math.floor(getTotal() * (discountRate / 100));
+	}
+
+	function getFinalTotal() {
+		return getTotal() - getDiscount();
 	}
 
 	async function purchaseCart() {
@@ -98,6 +127,9 @@ export default function CheckoutPage() {
 			);
 
 			toast.success("Order placed successfully!");
+			
+			// Dispatch event to update rewards points in real-time
+			window.dispatchEvent(new Event('order-placed'));
 			
 			// Clear cart and redirect
 			setTimeout(() => {
@@ -487,11 +519,29 @@ export default function CheckoutPage() {
 						<h2 className="text-xl font-semibold text-secondary mb-4">
 							Order Summary
 						</h2>
+						
+						{/* Membership Badge */}
+						{discountRate > 0 && (
+							<div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-3 mb-4">
+								<div className="flex items-center gap-2 mb-1">
+									<FaCrown className={`text-lg ${getTierColor()}`} />
+									<span className={`font-bold ${getTierColor()}`}>{membershipTier} Member</span>
+								</div>
+								<p className="text-xs text-secondary/60">You're getting {discountRate}% discount!</p>
+							</div>
+						)}
+						
 						<div className="space-y-3 mb-4">
 							<div className="flex justify-between text-secondary/70">
 								<span>Subtotal</span>
 								<span>LKR {getTotal().toFixed(2)}</span>
 							</div>
+							{discountRate > 0 && (
+								<div className="flex justify-between text-green-600 font-semibold">
+									<span>Membership Discount ({discountRate}%)</span>
+									<span>- LKR {getDiscount().toFixed(2)}</span>
+								</div>
+							)}
 							<div className="flex justify-between text-secondary/70">
 								<span>Shipping</span>
 								<span className="text-green-600">Free</span>
@@ -499,7 +549,7 @@ export default function CheckoutPage() {
 							<div className="h-px bg-secondary/20"></div>
 							<div className="flex justify-between text-secondary font-bold text-xl">
 								<span>Total</span>
-								<span className="text-accent">LKR {getTotal().toFixed(2)}</span>
+								<span className="text-accent">LKR {getFinalTotal().toFixed(2)}</span>
 							</div>
 						</div>
 						<button

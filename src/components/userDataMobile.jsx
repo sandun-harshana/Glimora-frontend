@@ -1,9 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Loader } from "./loader";
 import { FaUser } from "react-icons/fa";
 
 export default function UserDataMobile(){
+    const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -39,7 +41,7 @@ export default function UserDataMobile(){
                             <div className="w-full flex justify-around">
                                 <button className="bg-accent text-white px-4 py-2 rounded hover:bg-secondary transition" onClick={()=>{
                                     localStorage.removeItem("token");
-                                    window.location.href = "/login";
+                                    navigate("/login");
                                 }}
                                 >Yes</button>
                                 <button className="bg-accent text-white px-4 py-2 rounded hover:bg-secondary transition" onClick={()=>{
@@ -75,11 +77,11 @@ export default function UserDataMobile(){
                         if(e.target.value == "logout"){
                             setIsLogoutConfirmOpen(true);
                         } else if(e.target.value == "settings"){
-                            window.location.href = "/settings";
+                            navigate("/settings");
                         } else if(e.target.value == "orders"){
-                            window.location.href = "/my-orders";
+                            navigate("/my-orders");
                         } else if(e.target.value == "messages"){
-                            window.location.href = "/messages";
+                            navigate("/messages");
                         }
                     }
                 } className="ml-2 bg-accent max-w-[20px] text-white p-1 rounded">

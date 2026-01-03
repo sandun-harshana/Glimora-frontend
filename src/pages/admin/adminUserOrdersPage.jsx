@@ -103,6 +103,12 @@ export default function AdminUserOrdersPage() {
 				{ headers: { Authorization: `Bearer ${token}` } }
 			);
 			toast.success("Order status updated");
+			
+			// Dispatch event when order is marked as delivered to update user's reward points
+			if (newStatus === "delivered") {
+				window.dispatchEvent(new Event('order-delivered'));
+			}
+			
 			fetchOrders();
 		} catch (err) {
 			console.error("Error updating status:", err);

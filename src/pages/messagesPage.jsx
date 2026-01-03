@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { FaComments, FaShoppingCart, FaChartLine, FaTags, FaPaperPlane, FaTimes, FaReply, FaStar, FaRegStar, FaArchive, FaTrash, FaEllipsisV } from "react-icons/fa";
+import { FaComments, FaShoppingCart, FaChartLine, FaTags, FaPaperPlane, FaTimes, FaReply, FaStar, FaRegStar, FaArchive, FaTrash, FaEllipsisV, FaArrowLeft } from "react-icons/fa";
 import { MdPending, MdCheckCircle, MdClose, MdUnarchive } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 export default function MessagesPage() {
+	const navigate = useNavigate();
 	const [messages, setMessages] = useState([]);
 	const [selectedCategory, setSelectedCategory] = useState("all");
 	const [showNewMessageModal, setShowNewMessageModal] = useState(false);
@@ -242,6 +244,15 @@ export default function MessagesPage() {
 	return (
 		<div className="w-full min-h-screen bg-gradient-to-br from-primary/30 via-white to-primary/20 p-8">
 			<div className="max-w-7xl mx-auto">
+				{/* Back Button */}
+				<button
+					onClick={() => navigate(-1)}
+					className="mb-6 flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-secondary rounded-xl shadow-md hover:shadow-lg transition-all"
+				>
+					<FaArrowLeft />
+					<span className="font-semibold">Back</span>
+				</button>
+
 				{/* Header */}
 				<div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-accent/20">
 					<div className="flex items-center justify-between">

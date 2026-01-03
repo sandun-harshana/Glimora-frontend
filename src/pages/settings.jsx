@@ -1,9 +1,12 @@
 import axios from "axios";
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 import mediaUpload from "../utils/mediaUpload";
 import toast from "react-hot-toast";
 
 export default function UserSettings() {
+	const navigate = useNavigate();
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [image, setImage] = useState(null);
@@ -22,7 +25,7 @@ export default function UserSettings() {
 	useEffect(() => {
 		const token = localStorage.getItem("token");
 		if (!token) {
-			window.location.href = "/login";
+			navigate("/login");
 			return;
 		}
 		axios.get(import.meta.env.VITE_API_URL + "/api/users/me", {
@@ -35,7 +38,7 @@ export default function UserSettings() {
 			setUser(res.data);
 		}).catch(() => {
 			localStorage.removeItem("token");
-			window.location.href = "/login";
+			navigate("/login");
 		});
 	}, []);
 
@@ -158,9 +161,19 @@ export default function UserSettings() {
 		<div className="w-full min-h-screen bg-[url('/bg.jpg')] bg-cover bg-center bg-no-repeat flex flex-col lg:flex-row justify-center py-8">
 			{/* Left: User Info */}
 			<div className="w-full lg:w-[45%] backdrop-blur-2xl rounded-2xl m-4 p-6 flex flex-col bg-primary/70 shadow-xl ring-1 ring-secondary/10 h-fit">
-				<h1 className="text-2xl font-bold mb-6 text-center text-secondary">
-					Profile Settings
-				</h1>
+				<div className="flex items-center gap-4 mb-6">
+					<button
+						onClick={() => navigate(-1)}
+						className="p-2 hover:bg-secondary/10 rounded-lg transition-colors text-secondary"
+						title="Go back"
+					>
+						<FaArrowLeft className="text-xl" />
+					</button>
+					<h1 className="text-2xl font-bold text-secondary flex-1 text-center">
+						Profile Settings
+					</h1>
+					<div className="w-10"></div>
+				</div>
 
 				{/* Avatar + Uploader */}
 				<div className="flex flex-col items-center gap-4 mb-6">

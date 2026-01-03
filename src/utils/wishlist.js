@@ -16,6 +16,7 @@ export const addToWishlist = async (product) => {
         
         wishlist.push(product);
         localStorage.setItem("wishlist", JSON.stringify(wishlist));
+        window.dispatchEvent(new Event('wishlist-updated'));
         toast.success("Added to wishlist!");
         return true;
     }
@@ -27,6 +28,7 @@ export const addToWishlist = async (product) => {
             { headers: { Authorization: `Bearer ${token}` } }
         );
         
+        window.dispatchEvent(new Event('wishlist-updated'));
         toast.success("Added to wishlist!");
         return true;
     } catch (error) {
@@ -47,6 +49,7 @@ export const removeFromWishlist = async (productId) => {
         const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
         const updated = wishlist.filter(item => item._id !== productId);
         localStorage.setItem("wishlist", JSON.stringify(updated));
+        window.dispatchEvent(new Event('wishlist-updated'));
         toast.success("Removed from wishlist");
         return true;
     }
@@ -57,6 +60,7 @@ export const removeFromWishlist = async (productId) => {
             { headers: { Authorization: `Bearer ${token}` } }
         );
         
+        window.dispatchEvent(new Event('wishlist-updated'));
         toast.success("Removed from wishlist");
         return true;
     } catch (error) {
