@@ -17,22 +17,22 @@ function App() {
 	return (
 		<BrowserRouter>
 			<GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-				<div className="w-full h-[100vh] ">
+				<div className="w-full h-[100vh]">
 					<Toaster position="top-right" />
-					<Routes path="/">
-						<Route path="/*" element={<HomePage />} />
-						<Route path="/register" element={<RegisterPage />} />
-						<Route path="/forget-password" element={<ForgetPassword/>} />
-						<Route path="/login" element={<LoginPage />} />
-						<Route path="/admin/*" element={<AdminPage />} />
-						<Route path="/test" element={<TestPage />} />
-						<Route path="/settings" element={<UserSettings/>} />
-						<Route path="/messages" element={<MessagesPage/>} />
+						<Routes path="/">
+							<Route path="/*" element={<HomePage />} />
+							<Route path="/register" element={<RegisterPage />} />
+							<Route path="/forget-password" element={<ForgetPassword/>} />
+							<Route path="/login" element={<LoginPage />} />
+							<Route path="/admin/*" element={<AdminPage />} />
+							<Route path="/test" element={<TestPage />} />
+							<Route path="/settings" element={<UserSettings/>} />
+							<Route path="/messages" element={<MessagesPage/>} />
 
-					</Routes>
-				</div>
-			</GoogleOAuthProvider>
-		</BrowserRouter>
+						</Routes>
+					</div>
+				</GoogleOAuthProvider>
+			</BrowserRouter>
 	);
 }
 

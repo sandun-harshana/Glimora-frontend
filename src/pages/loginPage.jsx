@@ -9,23 +9,28 @@ export default function LoginPage() {
 	const [password, setPassword] = useState("");
     const navigate = useNavigate()
 	const googleLogin = useGoogleLogin({
-			onSuccess: (response)=>{
-				axios.post(import.meta.env.VITE_API_URL + "/api/users/google-login",{
-					token : response.access_token
-				}).then((res)=>{
-					localStorage.setItem("token",res.data.token)
-					window.dispatchEvent(new Event('user-logged-in'));
-					const user = res.data.user;
-					if(user.role == "admin"){
-						navigate("/admin");
-					}else{
-						navigate("/");
-					}
-				}).catch((err)=>{
-					console.error("Google login failed:", err);
-					toast.error("Google login failed. Please try again.");
-				});
-			}
+		onSuccess: (response)=>{
+			axios.post(import.meta.env.VITE_API_URL + "/api/users/google-login",{
+				token : response.access_token
+			}).then((res)=>{
+				localStorage.setItem("token",res.data.token)
+				window.dispatchEvent(new Event('user-logged-in'));
+				const user = res.data.user;
+				toast.success("Login successful!");
+				if(user.role == "admin"){
+					navigate("/admin");
+				}else{
+					navigate("/");
+				}
+			}).catch((err)=>{
+				console.error("Google login failed:", err);
+				toast.error("Google login failed. Please try again.");
+			});
+		},
+		onError: (error) => {
+			console.error("Google login error:", error);
+			toast.error("Failed to login with Google. Please try again.");
+		}
 	});
 
 	async function login() {
